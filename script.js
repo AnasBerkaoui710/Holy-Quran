@@ -1,0 +1,616 @@
+/**
+ * Holy Quran Player - script.js
+ * 
+ * CORE LOGIC:
+ * - Data Fetching (api.alquran.cloud)
+ * - Audio Playback (HTML5 Audio API)
+ * - State Management (Settings & User Session)
+ * - Multi-Language (i18n) Engine (EN/AR with Tashkil)
+ */
+
+// --- Translation Dictionary ---
+const TRANSLATIONS = {
+    en: {
+        menu_reciters: "Reciters",
+        menu_about: "About the App",
+        menu_settings: "Settings",
+        menu_contact: "Contact",
+        app_title: "Holy Quran Player",
+        app_subtitle: "Listen to the Noble Quran",
+        footer_rights: "Holy Quran Player",
+        featured_label: "Featured Reciter",
+        hq_badge: "High Quality MP3",
+        section_reciters: "Featured Reciters",
+        section_surahs: "Surah Playlist",
+        search_placeholder: "Search Surah...",
+        fetching_surahs: "Fetching Surahs...",
+        about_title: "About the App",
+        about_desc: "A professional Quran MP3 player that allows listening to high-quality recitations from renowned reciters.",
+        feat_surahs: "114 Surahs available",
+        feat_controls: "Professional playback controls",
+        feat_search: "Instant search and filtering",
+        feat_settings: "Persistent settings & preferences",
+        spiritual_note: "Listen and reflect on the words of Allah.",
+        contact_title: "Contact Us",
+        contact_msg: "For suggestions or feedback regarding this Quran application.",
+        settings_title: "Settings",
+        set_lang: "Language",
+        set_autoplay: "Auto-play Next Surah",
+        set_remember: "Remember Session",
+        set_darkmode: "Dark Mode",
+        set_def_reciter: "Default Reciter",
+        catalog_title: "Choose Reciter",
+        select_surah: "Select a Surah",
+        start_listening: "to start listening",
+        status_stopped: "Stopped",
+        status_playing: "Playing",
+        status_paused: "Paused",
+        status_error: "Error",
+        btn_select: "Select"
+    },
+    ar: {
+        menu_reciters: "القُرَّاءُ",
+        menu_about: "عَنِ التَّطْبِيقِ",
+        menu_settings: "الإِعْدَادَاتُ",
+        menu_contact: "اتَّصِلْ بِنَا",
+        app_title: "مُشَغِّلُ القُرْآنِ الكَرِيمِ",
+        app_subtitle: "اِسْتَمِعْ إِلَى القُرْآنِ الكَرِيمِ",
+        footer_rights: "مُشَغِّلُ القُرْآنِ الكَرِيمِ",
+        featured_label: "القَارِئُ المُمَيَّزُ",
+        hq_badge: "صَوْتٌ عَالِي الجَوْدَةِ",
+        section_reciters: "قُرَّاءٌ مُمَيَّزُونَ",
+        section_surahs: "قَائِمَةُ السُّوَرِ",
+        search_placeholder: "اِبْحَثْ عَنِ السُّورَةِ...",
+        fetching_surahs: "جَارٍ جَلْبُ السُّوَرِ...",
+        about_title: "حَوْلَ التَّطْبِيقِ",
+        about_desc: "مُشَغِّلٌ اِحْتِرَافِيٌّ لِلْقُرْآنِ الكَرِيمِ يُتِيحُ الِاسْتِمَاعَ إِلَى تِلَاوَاتٍ عَالِيَةِ الجَوْدَةِ مِنْ مَشَاهِيرِ القُرَّاءِ.",
+        feat_surahs: "١١٤ سُورَةً مُتَاحَةً",
+        feat_controls: "أَدَوَاتُ تَحَكُّمٍ اِحْتِرَافِيَّةٍ",
+        feat_search: "بَحْثٌ وَتَصْفِيَةٌ فَوْرِيَّةٌ",
+        feat_settings: "إِعْدَادَاتٌ وَتَفْضِيلَاتٌ مُسْتَمِرَّةٌ",
+        spiritual_note: "اِسْتَمِعْ وَتَدَبَّرْ كَلَامَ اللهِ عَزَّ وَجَلَّ.",
+        contact_title: "اتَّصِلْ بِنَا",
+        contact_msg: "لِلِاقْتِرَاحَاتِ أَوِ المُلَاحَظَاتِ بِخُصُوصِ هَذَا التَّطْبِيقِ.",
+        settings_title: "الإِعْدَادَاتُ",
+        set_lang: "اللُّغَةُ",
+        set_autoplay: "التَّشْغِيلُ التِّلْقَائِيُّ",
+        set_remember: "تَذَكُّرُ الجَلْسَةِ",
+        set_darkmode: "الوَضْعُ اللِّيْلِيُّ",
+        set_def_reciter: "القَارِئُ الاِفْتِرَاضِيُّ",
+        catalog_title: "اخْتَرِ القَارِئَ",
+        select_surah: "اِخْتَرْ سُورَةً",
+        start_listening: "لِلْبَدْءِ فِي الِاسْتِمَاعِ",
+        status_stopped: "مُتَوَقِّفٌ",
+        status_playing: "جَارٍ التَّشْغِيلُ",
+        status_paused: "مُتَوَقِّفٌ مُؤَقَّتًا",
+        status_error: "خَطَأٌ",
+        btn_select: "اِخْتَرْ"
+    }
+};
+
+// --- Data & Configuration ---
+const RECITERS = [
+    {
+        id: 'minsh',
+        name: { en: 'Muhammad Siddiq al-Minshawi', ar: 'مُحَمَّدُ صِدِّيق المِنْشَاوِي' },
+        subname: 'Murattal',
+        country: { en: 'Egypt', ar: 'مِصْرُ' },
+        server: 'https://server10.mp3quran.net/minsh/',
+        image: 'Images/Al-Minshawi.jpg',
+        description: {
+            en: 'Renowned for his melodic and emotional Murattal recitation, Al-Minshawi is a pillar of the golden age of Egyptian reciters.',
+            ar: 'اِشْتَهَرَ بِتِلَاوَتِهِ المُرَتَّلَةِ العَذْبَةِ وَالمُؤَثِّرَةِ، وَيُعَدُّ رُكْنًا مِنْ أَرْكَانِ مَدْرَسَةِ التِّلَاوَةِ المِصْرِيَّةِ القَدِيمَةِ.'
+        }
+    },
+    {
+        id: 'basit',
+        name: { en: 'Abdul Basit Abdus Samad', ar: 'عَبْدُ البَاسِطِ عَبْدِ الصَّمَدِ' },
+        subname: 'Murattal',
+        country: { en: 'Egypt', ar: 'مِصْرُ' },
+        server: 'https://server7.mp3quran.net/basit/',
+        image: 'Images/abdelbassit-abdessamad.jpg',
+        description: {
+            en: 'Commonly known as the "Golden Throat," his powerful and breath-taking recitations are celebrated globally.',
+            ar: 'يُلَقَّبُ بـ "الحَنْجَرَةِ الذَّهَبِيَّةِ"، حَيْثُ نَالَتْ تِلَاوَاتُهُ القَوِيَّةُ وَالمُذْهِلَةُ شُهْرَةً وَاسِعَةً فِي جَمِيعِ أَنْحَاءِ العَالَمِ.'
+        }
+    },
+    {
+        id: 'husr',
+        name: { en: 'Mahmoud Khalil Al-Hussary', ar: 'مَحْمُودُ خَلِيل الحُصَرِي' },
+        subname: 'Murattal',
+        country: { en: 'Egypt', ar: 'مِصْرُ' },
+        server: 'https://server13.mp3quran.net/husr/',
+        image: 'Images/mahmoud-khalil-al-hussary.jpg',
+        description: {
+            en: 'A master of Tajweed, his precise and clear articulation makes his recitations a standard for students and listeners alike.',
+            ar: 'شَيْخُ عُمُومِ المَقَارِئِ المِصْرِيَّةِ، اِشْتَهَرَ بِدِقَّةِ مَخَارِجِ الحُرُوفِ وَإِتْقَانِ قَوَاعِدِ التَّجْوِيدِ.'
+        }
+    },
+    {
+        id: 'afs',
+        name: { en: 'Mishary Rashid Alafasy', ar: 'مِشَارِي رَاشِد العَفَاسِي' },
+        subname: 'Alafasy',
+        country: { en: 'Kuwait', ar: 'الكُوَيْتُ' },
+        server: 'https://server12.mp3quran.net/afs/',
+        image: 'Images/mishary-rashid-alafasy.png',
+        description: {
+            en: 'A contemporary world-famous reciter and Imam, known for his beautiful voice and modern, high-quality recordings.',
+            ar: 'قَارِئٌ وَإِمَامٌ كُوَيْتِيٌّ، نَالَ شُهْرَةً عَالَمِيَّةً بِفَضْلِ صَوْتِهِ الخَاشِعِ وَإِصْدَارَاتِهِ الِاحْتِرَافِيَّةِ الحَدِيثَةِ.'
+        }
+    }
+];
+
+// --- State Management ---
+let state = {
+    surahs: [],
+    currentReciter: RECITERS[0],
+    currentSurahIndex: -1,
+    isPlaying: false,
+    settings: {
+        isAutoplay: true,
+        isDarkMode: false,
+        rememberSession: true,
+        volume: 0.7,
+        defaultReciterId: 'minsh',
+        language: 'en'
+    }
+};
+
+// --- DOM Selectors ---
+const audio = document.getElementById('main-audio');
+const surahListContainer = document.getElementById('surah-list');
+const recitersGrid = document.getElementById('reciters-grid');
+const surahSearchInput = document.getElementById('surah-search');
+
+// Featured UI
+const featuredName = document.getElementById('featured-name');
+const featuredCountry = document.getElementById('featured-country');
+const featuredImg = document.getElementById('featured-img');
+
+// Player UI
+const playPauseBtn = document.getElementById('play-pause-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const skipBackBtn = document.getElementById('skip-back-btn');
+const skipForwardBtn = document.getElementById('skip-forward-btn');
+const volumeSlider = document.getElementById('volume-slider');
+const volumeIcon = document.getElementById('volume-icon');
+const autoplayToggleQuick = document.getElementById('autoplay-toggle-quick');
+const progressBar = document.getElementById('progress-bar');
+const progressWrap = document.getElementById('progress-wrap');
+const currentTimeEl = document.getElementById('current-time');
+const durationEl = document.getElementById('duration');
+
+// Track Info UI
+const playingSurahTitle = document.getElementById('playing-surah');
+const playingReciterName = document.getElementById('playing-reciter');
+const playerReciterImg = document.getElementById('player-reciter-img');
+const playerStatus = document.getElementById('player-status');
+
+// Side Menu & Modals
+const menuToggle = document.getElementById('menu-toggle');
+const sideMenu = document.getElementById('side-menu');
+const closeMenu = document.getElementById('close-menu');
+const overlay = document.getElementById('overlay');
+const menuLinks = document.querySelectorAll('.menu-link');
+const closeModals = document.querySelectorAll('.close-modal');
+
+// Language Switching
+const langToggleHeader = document.getElementById('lang-toggle-header');
+const langLabelHeader = document.getElementById('lang-label-header');
+const languageSelect = document.getElementById('language-select');
+
+// Settings Inputs
+const autoplaySwitch = document.getElementById('autoplay-switch');
+const rememberSwitch = document.getElementById('save-position-switch');
+const darkModeSwitch = document.getElementById('dark-mode-switch');
+const defaultReciterSelect = document.getElementById('default-reciter-select');
+
+/**
+ * INITIALIZATION
+ * Bootstraps the app by loading settings, fetching data, and rendering UI.
+ */
+async function init() {
+    try {
+        loadSettings();
+        applyLanguage(state.settings.language);
+        await fetchSurahs();
+        renderReciters();
+        renderReciterPanel();
+        renderSettingsOptions();
+        applySettings();
+        updateFeaturedUI();
+    } catch (e) {
+        console.error("Initialization failed:", e);
+    }
+}
+
+// Ensure DOM is ready
+document.addEventListener('DOMContentLoaded', init);
+
+/**
+ * DATA FETCHING
+ * Retrieves surah metadata from the public AlQuran API.
+ */
+async function fetchSurahs() {
+    try {
+        const response = await fetch('https://api.alquran.cloud/v1/surah');
+        const data = await response.json();
+        state.surahs = data.data;
+        renderSurahList(state.surahs);
+        
+        // Handle session resume
+        if (state.settings.rememberSession && state.lastSessionIndex !== undefined && state.lastSessionIndex !== -1) {
+            setupInitialSession(state.lastSessionIndex);
+        }
+    } catch (error) {
+        console.error('Error fetching surahs:', error);
+        if (surahListContainer) {
+            surahListContainer.innerHTML = `<p class="error">${TRANSLATIONS[state.settings.language].status_error}</p>`;
+        }
+    }
+}
+
+// --- Multi-Language Logic ---
+function applyLanguage(lang) {
+    state.settings.language = lang;
+    const isAr = lang === 'ar';
+    
+    // Update HTML attributes
+    document.documentElement.lang = lang;
+    document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+    
+    // Update all data-i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (TRANSLATIONS[lang][key]) {
+            el.textContent = TRANSLATIONS[lang][key];
+        }
+    });
+
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (TRANSLATIONS[lang][key]) {
+            el.placeholder = TRANSLATIONS[lang][key];
+        }
+    });
+
+    // Update Header Toggle Label
+    langLabelHeader.textContent = isAr ? 'EN' : 'AR';
+    languageSelect.value = lang;
+
+    // Refresh dynamic lists
+    if (state.surahs.length > 0) renderSurahList(state.surahs);
+    renderReciters();
+    renderReciterPanel();
+    updateFeaturedUI();
+    saveSettings();
+}
+
+/**
+ * MENU & MODAL HANDLING
+ */
+function toggleMenu(show) {
+    sideMenu.classList.toggle('active', show);
+    overlay.classList.toggle('active', show);
+}
+
+function showModal(modalId) {
+    toggleMenu(false);
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('active');
+    overlay.classList.add('active');
+}
+
+function hideAllModals() {
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+    overlay.classList.remove('active');
+    toggleMenu(false);
+}
+
+// Event Listeners for UI
+menuToggle.addEventListener('click', () => toggleMenu(true));
+closeMenu.addEventListener('click', () => toggleMenu(false));
+overlay.addEventListener('click', hideAllModals);
+
+menuLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        const target = e.currentTarget.getAttribute('data-modal');
+        showModal(target);
+    });
+});
+
+closeModals.forEach(btn => {
+    btn.addEventListener('click', hideAllModals);
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideAllModals();
+});
+
+langToggleHeader.addEventListener('click', () => {
+    const newLang = state.settings.language === 'en' ? 'ar' : 'en';
+    applyLanguage(newLang);
+});
+
+languageSelect.addEventListener('change', (e) => {
+    applyLanguage(e.target.value);
+});
+
+// --- Rendering Logic ---
+function renderReciters() {
+    recitersGrid.innerHTML = '';
+    const lang = state.settings.language;
+    RECITERS.slice(0, 4).forEach(reciter => {
+        const card = document.createElement('div');
+        card.className = `reciter-card ${state.currentReciter.id === reciter.id ? 'active' : ''}`;
+        card.innerHTML = `
+            <div class="img-container"><img src="${reciter.image}" alt="${reciter.name[lang]}"></div>
+            <h4>${reciter.name[lang]}</h4>
+            <span>${reciter.country[lang]}</span>
+        `;
+        card.onclick = () => selectReciter(reciter);
+        recitersGrid.appendChild(card);
+    });
+}
+
+function renderReciterPanel() {
+    const list = document.getElementById('reciters-panel-list');
+    const lang = state.settings.language;
+    list.innerHTML = '';
+    RECITERS.forEach(reciter => {
+        const card = document.createElement('div');
+        card.className = `reciter-panel-card ${state.currentReciter.id === reciter.id ? 'active' : ''}`;
+        card.innerHTML = `
+            <img src="${reciter.image}" alt="${reciter.name[lang]}">
+            <div class="reciter-panel-info">
+                <h4>${reciter.name[lang]}</h4>
+                <p>${reciter.description[lang]}</p>
+            </div>
+            <button class="select-rec-btn">${TRANSLATIONS[lang].btn_select}</button>
+        `;
+        card.onclick = () => {
+            selectReciter(reciter);
+            hideAllModals();
+        };
+        list.appendChild(card);
+    });
+}
+
+function renderSettingsOptions() {
+    const lang = state.settings.language;
+    defaultReciterSelect.innerHTML = RECITERS.map(r => 
+        `<option value="${r.id}" ${state.settings.defaultReciterId === r.id ? 'selected' : ''}>${r.name[lang]}</option>`
+    ).join('');
+}
+
+/**
+ * SURAH LIST RENDERER
+ * Generates the 114 surah items with Arabic/English names.
+ * @param {Array} surahsToRender - List of surah objects to display.
+ */
+function renderSurahList(surahsToRender) {
+    if (!surahListContainer) return;
+    if (!surahsToRender || surahsToRender.length === 0) return;
+    
+    surahListContainer.innerHTML = '';
+    surahsToRender.forEach((surah) => {
+        const actualIndex = state.surahs.findIndex(s => s.number === surah.number);
+        const item = document.createElement('div');
+        item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''}`;
+        
+        // Use dual names as requested
+        const titleText = `${surah.number}. ${surah.englishName} - ${surah.name}`;
+        
+        item.innerHTML = `
+            <div class="surah-num">${surah.number}</div>
+            <div class="surah-info">
+                <h5>${surah.englishName}</h5>
+                <p>${surah.englishNameTranslation} • ${surah.numberOfAyahs} Ayahs</p>
+            </div>
+            <div class="surah-arabic">${surah.name}</div>
+        `;
+        item.onclick = () => selectSurah(actualIndex);
+        surahListContainer.appendChild(item);
+    });
+}
+
+// --- Selection Logic ---
+function selectReciter(reciter) {
+    state.currentReciter = reciter;
+    renderReciters();
+    renderReciterPanel();
+    updateFeaturedUI();
+    
+    if (state.currentSurahIndex !== -1) {
+        playSurah(state.currentSurahIndex);
+    }
+}
+
+function selectSurah(index) {
+    state.currentSurahIndex = index;
+    playSurah(index);
+}
+
+function setupInitialSession(index) {
+    state.currentSurahIndex = index;
+    const surah = state.surahs[index];
+    const surahNumber = String(surah.number).padStart(3, '0');
+    audio.src = `${state.currentReciter.server}${surahNumber}.mp3`;
+    playerStatus.textContent = TRANSLATIONS[state.settings.language].status_paused;
+    updateSurahListHighlight();
+    updateFeaturedUI();
+}
+
+function updateFeaturedUI() {
+    const lang = state.settings.language;
+    featuredName.textContent = state.currentReciter.name[lang];
+    featuredCountry.textContent = `${TRANSLATIONS[lang].hq_badge} • ${state.currentReciter.country[lang]}`;
+    featuredImg.src = state.currentReciter.image;
+    
+    playerReciterImg.src = state.currentReciter.image;
+    playingReciterName.textContent = state.currentReciter.name[lang];
+    
+    if (state.currentSurahIndex !== -1 && state.surahs.length > 0) {
+        const surah = state.surahs[state.currentSurahIndex];
+        // Show dual names in player as well
+        playingSurahTitle.textContent = `${surah.number}. ${surah.englishName} - ${surah.name}`;
+    }
+}
+
+/**
+ * AUDIO PLAYBACK ENGINE
+ * Handles MP3 URL construction and Audio API calls.
+ */
+function playSurah(index) {
+    const surah = state.surahs[index];
+    if (!surah) return;
+    const surahNumber = String(surah.number).padStart(3, '0');
+    audio.src = `${state.currentReciter.server}${surahNumber}.mp3`;
+    
+    audio.play()
+        .then(() => {
+            state.isPlaying = true;
+            updatePlayerUI();
+            updateSurahListHighlight();
+            updateFeaturedUI();
+            saveSettings();
+        })
+        .catch(() => { playerStatus.textContent = TRANSLATIONS[state.settings.language].status_error; });
+}
+
+function togglePlay() {
+    if (state.currentSurahIndex === -1) {
+        selectSurah(0);
+        return;
+    }
+    if (state.isPlaying) { audio.pause(); state.isPlaying = false; }
+    else { audio.play(); state.isPlaying = true; }
+    updatePlayerUI();
+}
+
+function updatePlayerUI() {
+    const lang = state.settings.language;
+    const icon = playPauseBtn.querySelector('i');
+    icon.className = state.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+    playerStatus.textContent = state.isPlaying ? TRANSLATIONS[lang].status_playing : TRANSLATIONS[lang].status_paused;
+    playerStatus.classList.toggle('active', state.isPlaying);
+}
+
+function updateSurahListHighlight() {
+    document.querySelectorAll('.surah-item').forEach((item, i) => {
+        item.classList.toggle('playing', i === state.currentSurahIndex);
+    });
+}
+
+// --- Controls Events ---
+playPauseBtn.onclick = togglePlay;
+prevBtn.onclick = () => selectSurah((state.currentSurahIndex - 1 + state.surahs.length) % state.surahs.length);
+nextBtn.onclick = () => selectSurah((state.currentSurahIndex + 1) % state.surahs.length);
+skipBackBtn.onclick = () => audio.currentTime -= 10;
+skipForwardBtn.onclick = () => audio.currentTime += 10;
+
+autoplayToggleQuick.onclick = () => {
+    state.settings.isAutoplay = !state.settings.isAutoplay;
+    applySettingsUI();
+};
+
+audio.ontimeupdate = () => {
+    if (audio.duration) {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = `${percent}%`;
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+    }
+};
+
+progressWrap.onclick = (e) => {
+    audio.currentTime = (e.offsetX / progressWrap.clientWidth) * audio.duration;
+};
+
+volumeSlider.oninput = (e) => {
+    state.settings.volume = e.target.value;
+    audio.volume = state.settings.volume;
+    updateVolumeIcon(state.settings.volume);
+    saveSettings();
+};
+
+function updateVolumeIcon(vol) {
+    if (vol == 0) volumeIcon.className = 'fas fa-volume-mute';
+    else if (vol < 0.5) volumeIcon.className = 'fas fa-volume-down';
+    else volumeIcon.className = 'fas fa-volume-up';
+}
+
+audio.onended = () => {
+    if (state.settings.isAutoplay) nextBtn.click();
+    else { state.isPlaying = false; updatePlayerUI(); }
+};
+
+surahSearchInput.oninput = (e) => {
+    const q = e.target.value.toLowerCase();
+    renderSurahList(state.surahs.filter(s => 
+        s.englishName.toLowerCase().includes(q) || 
+        s.name.includes(q) || 
+        s.number.toString().includes(q)
+    ));
+};
+
+// --- Settings Logic ---
+autoplaySwitch.onchange = (e) => { state.settings.isAutoplay = e.target.checked; applySettingsUI(); };
+rememberSwitch.onchange = (e) => { state.settings.rememberSession = e.target.checked; saveSettings(); };
+darkModeSwitch.onchange = (e) => { state.settings.isDarkMode = e.target.checked; applyTheme(); };
+defaultReciterSelect.onchange = (e) => { state.settings.defaultReciterId = e.target.value; saveSettings(); };
+
+function applyTheme() {
+    document.body.classList.toggle('dark-theme', state.settings.isDarkMode);
+    saveSettings();
+}
+
+function applySettingsUI() {
+    autoplayToggleQuick.classList.toggle('active', state.settings.isAutoplay);
+    autoplaySwitch.checked = state.settings.isAutoplay;
+    rememberSwitch.checked = state.settings.rememberSession;
+    darkModeSwitch.checked = state.settings.isDarkMode;
+    applyTheme();
+    saveSettings();
+}
+
+function formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// --- LocalStorage ---
+function saveSettings() {
+    localStorage.setItem('quran_player_full_v3', JSON.stringify({
+        settings: state.settings,
+        currentSurahIndex: state.currentSurahIndex,
+        currentReciterId: state.currentReciter.id
+    }));
+}
+
+function loadSettings() {
+    const saved = localStorage.getItem('quran_player_full_v3');
+    if (saved) {
+        const data = JSON.parse(saved);
+        state.settings = { ...state.settings, ...data.settings };
+        if (data.currentReciterId) {
+            state.currentReciter = RECITERS.find(r => r.id === data.currentReciterId) || RECITERS[0];
+        }
+        state.lastSessionIndex = data.currentSurahIndex;
+    } else {
+        state.currentReciter = RECITERS.find(r => r.id === state.settings.defaultReciterId) || RECITERS[0];
+    }
+}
+
+function applySettings() {
+    audio.volume = state.settings.volume;
+    volumeSlider.value = state.settings.volume;
+    updateVolumeIcon(state.settings.volume);
+    applySettingsUI();
+}
+
+// Start app automatically via DOMContentLoaded listener

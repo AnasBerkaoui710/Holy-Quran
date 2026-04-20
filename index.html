@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holy Quran Player - Listen to the Noble Quran</title>
+    <link rel="icon" type="image/png" href="Images/Logo-holy-quran.PNG">
+    <meta name="description" content="A professional Quran MP3 Player featuring world-renowned reciters. Listen to the Holy Quran with high-quality audio and an elegant Islamic interface.">
+    
+    <!-- Google Fonts: Amiri for Arabic, Inter for English -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 
+        SIDE NAVIGATION MENU 
+        Slide-in drawer with links to Reciters, About, Settings, and Contact.
+    -->
+    <nav id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <img src="Images/Logo-holy-quran.PNG" alt="Logo" class="menu-logo">
+            <button id="close-menu" class="icon-btn" aria-label="Close Menu"><i class="fas fa-times"></i></button>
+        </div>
+        <ul class="menu-items">
+            <li><button class="menu-link" data-modal="reciters-modal">
+                <i class="fas fa-user-friends"></i> <span data-i18n="menu_reciters">Reciters</span>
+            </button></li>
+            <li><button class="menu-link" data-modal="about-modal">
+                <i class="fas fa-info-circle"></i> <span data-i18n="menu_about">About the App</span>
+            </button></li>
+            <li><button class="menu-link" data-modal="settings-modal">
+                <i class="fas fa-cog"></i> <span data-i18n="menu_settings">Settings</span>
+            </button></li>
+            <li><button class="menu-link" data-modal="contact-modal">
+                <i class="fas fa-envelope"></i> <span data-i18n="menu_contact">Contact</span>
+            </button></li>
+        </ul>
+        <div class="menu-footer">
+            <p>&copy; 2026 <span data-i18n="footer_rights">Holy Quran Player</span></p>
+        </div>
+    </nav>
+
+    <!-- DARK OVERLAY (Dimming background when menu or modals are active) -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- MAIN HEADER: Contains hamburger menu and app identity. -->
+    <header class="app-header">
+        <div class="container header-container">
+            <div class="header-left">
+                <button id="menu-toggle" class="menu-toggle" aria-label="Open Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo-area">
+                    <img src="Images/Logo-holy-quran.PNG" alt="Holy Quran Logo" class="main-logo-img">
+                    <div class="title-wrap">
+                        <h1 data-i18n="app_title">Holy Quran Player</h1>
+                        <p data-i18n="app_subtitle">Listen to the Noble Quran</p>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <!-- Quick Language Switcher -->
+                <button id="lang-toggle-header" class="lang-toggle-btn" title="Change Language">
+                    <i class="fas fa-globe"></i>
+                    <span id="lang-label-header">AR</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 
+            FEATURED RECITER SECTION
+            Highlights the currently active or default reciter. 
+        -->
+        <section id="featured-reciter" class="featured-reciter glass">
+            <div class="featured-info">
+                <span class="label" data-i18n="featured_label">Featured Reciter</span>
+                <h2 id="featured-name">Loading...</h2>
+                <p id="featured-country">Loading...</p>
+                <div class="featured-badge">
+                    <i class="fas fa-check-circle"></i> <span data-i18n="hq_badge">High Quality MP3</span>
+                </div>
+            </div>
+            <div class="featured-image">
+                <img id="featured-img" src="" alt="Featured Reciter">
+            </div>
+        </section>
+
+        <!-- 
+            RECITER SELECTION (SHORTCUT GRID)
+            Horizontal grid of top reciter circles for quick selection.
+        -->
+        <section class="section-container">
+            <h3 class="section-title"><i class="fas fa-star"></i> <span data-i18n="section_reciters">Featured Reciters</span></h3>
+            <div id="reciters-grid" class="reciters-grid">
+                <!-- Reciter cards will be injected here -->
+            </div>
+        </section>
+
+        <!-- 
+            SURAH PLAYLIST SECTION
+            Full list of 114 surahs with search functionality.
+        -->
+        <section class="section-container">
+            <div class="surah-header">
+                <h3 class="section-title"><i class="fas fa-book-open"></i> <span data-i18n="section_surahs">Surah Playlist</span></h3>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="surah-search" placeholder="Search Surah..." data-i18n-placeholder="search_placeholder">
+                </div>
+            </div>
+            <div id="surah-list" class="surah-list">
+                <div class="loading-spinner">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <p data-i18n="fetching_surahs">Fetching Surahs...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 
+        MODALS SECTION 
+        Pop-up interfaces for Settings, About, Reciter Catalog, and Contact.
+    -->
+    
+    <!-- About Modal -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> <span data-i18n="about_title">About the App</span></h3>
+                <button class="close-modal icon-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <h4 data-i18n="app_title">Holy Quran Player</h4>
+                <p data-i18n="about_desc">A professional Quran MP3 player that allows listening to high-quality recitations from renowned reciters.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> <span data-i18n="feat_surahs">114 Surahs available</span></li>
+                    <li><i class="fas fa-check"></i> <span data-i18n="feat_controls">Professional playback controls</span></li>
+                    <li><i class="fas fa-check"></i> <span data-i18n="feat_search">Instant search and filtering</span></li>
+                    <li><i class="fas fa-check"></i> <span data-i18n="feat_settings">Persistent settings & preferences</span></li>
+                </ul>
+                <p class="spiritual-note" data-i18n="spiritual_note">Listen and reflect on the words of Allah.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-envelope"></i> <span data-i18n="contact_title">Contact Us</span></h3>
+                <button class="close-modal icon-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body text-center">
+                <p data-i18n="contact_msg">For suggestions or feedback regarding this Quran application.</p>
+                <div class="contact-email">
+                    <i class="fas fa-at"></i> berkaoui.anass12@gmail.com
+                </div>
+                <div class="social-links">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="https://github.com/AnasBerkaoui710" target="_blank" class="social-icon"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> <span data-i18n="settings_title">Settings</span></h3>
+                <button class="close-modal icon-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label data-i18n="set_lang">Language</label>
+                    <select id="language-select" class="styled-select">
+                        <option value="en">English</option>
+                        <option value="ar">العربية (Moushal)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="autoplay-switch" data-i18n="set_autoplay">Auto-play Next Surah</label>
+                    <label class="switch">
+                        <input type="checkbox" id="autoplay-switch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="save-position-switch" data-i18n="set_remember">Remember Session</label>
+                    <label class="switch">
+                        <input type="checkbox" id="save-position-switch" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label for="dark-mode-switch" data-i18n="set_darkmode">Dark Mode</label>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode-switch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label data-i18n="set_def_reciter">Default Reciter</label>
+                    <select id="default-reciter-select" class="styled-select">
+                        <!-- Options injected by JS -->
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reciters Modal -->
+    <div id="reciters-modal" class="modal large">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-friends"></i> <span data-i18n="catalog_title">Choose Reciter</span></h3>
+                <button class="close-modal icon-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="reciters-panel-list" class="modal-body reciters-panel-list">
+                <!-- Detailed reciter cards injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        AUDIO PLAYER BOTTOM BAR (FIXED)
+        Persistent playback controls and progress information.
+    -->
+    <footer class="player-bar glass">
+        <div class="container player-container">
+            <!-- Current Track Info -->
+            <div class="current-track">
+                <img id="player-reciter-img" src="Images/Al-Minshawi.jpg" alt="">
+                <div class="track-details">
+                    <h4 id="playing-surah" data-i18n="select_surah">Select a Surah</h4>
+                    <p id="playing-reciter" data-i18n="start_listening">to start listening</p>
+                    <span id="player-status" class="status-badge" data-i18n="status_stopped">Stopped</span>
+                </div>
+            </div>
+
+            <!-- Player Controls -->
+            <div class="player-controls-wrap">
+                <div class="main-controls">
+                    <button id="prev-btn" title="Previous Surah"><i class="fas fa-step-backward"></i></button>
+                    <button id="skip-back-btn" title="Back 10s"><i class="fas fa-undo"></i></button>
+                    <button id="play-pause-btn" class="play-btn" title="Play/Pause"><i class="fas fa-play"></i></button>
+                    <button id="skip-forward-btn" title="Forward 10s"><i class="fas fa-redo"></i></button>
+                    <button id="next-btn" title="Next Surah"><i class="fas fa-step-forward"></i></button>
+                </div>
+                
+                <div class="progress-container">
+                    <span id="current-time">0:00:00</span>
+                    <div class="progress-bar-wrap" id="progress-wrap">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <span id="duration">0:00:00</span>
+                </div>
+            </div>
+
+            <!-- Volume & Quick Actions -->
+            <div class="extra-controls">
+                <div class="volume-control">
+                    <i id="volume-icon" class="fas fa-volume-up"></i>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
+                </div>
+                <button id="autoplay-toggle-quick" title="Toggle Auto-play">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Hidden Audio Element -->
+    <audio id="main-audio"></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
