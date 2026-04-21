@@ -50,7 +50,9 @@ const TRANSLATIONS = {
         status_error: "Error",
         btn_select: "Select",
         section_favorites: "Favorite Surahs",
-        no_favorites: "No favorite surahs yet."
+        no_favorites: "No favorite surahs yet.",
+        no_results: "No surahs found matching your search.",
+        retry_btn: "Retry Loading"
     },
     ar: {
         menu_reciters: "القُرَّاءُ",
@@ -92,7 +94,9 @@ const TRANSLATIONS = {
         status_error: "خَطَأٌ",
         btn_select: "اِخْتَرْ",
         section_favorites: "السُّوَرُ المُفَضَّلَةُ",
-        no_favorites: "لَا تُوجَدُ سُوَرٌ مُفَضَّلَةٌ بَعْدُ."
+        no_favorites: "لَا تُوجَدُ سُوَرٌ مُفَضَّلَةٌ بَعْدُ.",
+        no_results: "لَمْ يَتِمَّ العُثُورُ عَلَى سُوَرٍ مُطَابِقَةٍ لِبَحْثِكَ.",
+        retry_btn: "إِعَادَةُ المُحَاوَلَةِ"
     }
 };
 
@@ -247,6 +251,7 @@ document.addEventListener('DOMContentLoaded', init);
 async function fetchSurahs() {
     try {
         const response = await fetch('https://api.alquran.cloud/v1/surah');
+        if (!response.ok) throw new Error("Network response was not ok");
         const data = await response.json();
         state.surahs = data.data;
         renderSurahList(state.surahs);
@@ -259,7 +264,13 @@ async function fetchSurahs() {
     } catch (error) {
         console.error('Error fetching surahs:', error);
         if (surahListContainer) {
-            surahListContainer.innerHTML = `<p class="error">${TRANSLATIONS[state.settings.language].status_error}</p>`;
+            const lang = state.settings.language;
+            surahListContainer.innerHTML = `
+                <div class="error-container">
+                    <p class="error">${TRANSLATIONS[lang].status_error}</p>
+                    <button class="retry-btn" onclick="fetchSurahs()">${TRANSLATIONS[lang].retry_btn}</button>
+                </div>
+            `;
         }
     }
 }
@@ -308,20 +319,28 @@ function applyLanguage(lang) {
  */
 function toggleMenu(show) {
     sideMenu.classList.toggle('active', show);
-    overlay.classList.toggle('active', show);
+    updateOverlayState();
 }
 
 function showModal(modalId) {
-    toggleMenu(false);
     const modal = document.getElementById(modalId);
-    if (modal) modal.classList.add('active');
-    overlay.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        sideMenu.classList.remove('active'); // Close menu without hiding overlay yet
+        updateOverlayState();
+    }
 }
 
 function hideAllModals() {
     document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-    overlay.classList.remove('active');
-    toggleMenu(false);
+    sideMenu.classList.remove('active');
+    updateOverlayState();
+}
+
+function updateOverlayState() {
+    const isAnyModalOpen = document.querySelector('.modal.active');
+    const isMenuOpen = sideMenu.classList.contains('active');
+    overlay.classList.toggle('active', !!(isAnyModalOpen || isMenuOpen));
 }
 
 // Event Listeners for UI
@@ -352,6 +371,11 @@ playerFavBtn.addEventListener('click', () => {
 });
 
 function navigateTo(pageId) {
+    // Reset search when going home
+    if (pageId === 'home-page') {
+        resetSearch();
+    }
+
     appPages.forEach(page => {
         page.classList.toggle('active', page.id === pageId);
         // Explicitly handle display for older browsers or safety
@@ -361,6 +385,14 @@ function navigateTo(pageId) {
 
     // Scroll to top when changing page
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetSearch() {
+    headerSearchInput.value = '';
+    surahSearchInput.value = '';
+    if (state.surahs.length > 0) {
+        renderSurahList(state.surahs);
+    }
 }
 
 closeModals.forEach(btn => {
@@ -389,7 +421,7 @@ function normalizeArabic(text) {
     return text
         .replace(/[\u064B-\u065F]/g, "") // Strip Tashkil
         .replace(/\u0621/g, "\u0627") // Normalize Hamza
-        .replace(/[\u0622\u0623\u0625]/g, "\u0627") // Normalize Alif
+        .replace(/[\u0622\u0623\u0625\u0671]/g, "\u0627") // Normalize Alif (including Alif Wasla)
         .replace(/\u0649/g, "\u064A") // Normalize Yaa
         .replace(/\u0629/g, "\u0647"); // Normalize Taa Marbuta
 }
@@ -403,9 +435,9 @@ function performSearch(query) {
         navigateTo('home-page');
     }
     
-    // Sync both inputs
-    headerSearchInput.value = query;
-    surahSearchInput.value = query;
+    // Sync both inputs if needed (prevent recursive input events or cursor jumps)
+    if (headerSearchInput.value !== query) headerSearchInput.value = query;
+    if (surahSearchInput.value !== query) surahSearchInput.value = query;
     
     // Auto-scroll to playlist on search
     if (q.length > 0) {
@@ -502,7 +534,12 @@ function renderSettingsOptions() {
  */
 function renderSurahList(surahsToRender) {
     if (!surahListContainer) return;
-    if (!surahsToRender || surahsToRender.length === 0) return;
+    const lang = state.settings.language;
+
+    if (!surahsToRender || surahsToRender.length === 0) {
+        surahListContainer.innerHTML = `<div class="no-results-msg">${TRANSLATIONS[lang].no_results}</div>`;
+        return;
+    }
 
     surahListContainer.innerHTML = '';
     surahsToRender.forEach((surah) => {
@@ -679,9 +716,24 @@ function togglePlay() {
         selectSurah(0);
         return;
     }
-    if (state.isPlaying) { audio.pause(); state.isPlaying = false; }
-    else { audio.play(); state.isPlaying = true; }
-    updatePlayerUI();
+    if (state.isPlaying) { 
+        audio.pause(); 
+        state.isPlaying = false; 
+        updatePlayerUI();
+    }
+    else { 
+        audio.play()
+            .then(() => {
+                state.isPlaying = true;
+                updatePlayerUI();
+            })
+            .catch(err => {
+                console.error("Playback failed:", err);
+                playerStatus.textContent = TRANSLATIONS[state.settings.language].status_error;
+                state.isPlaying = false;
+                updatePlayerUI();
+            });
+    }
 }
 
 function updatePlayerUI() {
@@ -733,7 +785,7 @@ volumeSlider.oninput = (e) => {
 };
 
 function updateVolumeIcon(vol) {
-    if (vol == 0) volumeIcon.className = 'fas fa-volume-mute';
+    if (vol <= 0.01) volumeIcon.className = 'fas fa-volume-mute';
     else if (vol < 0.5) volumeIcon.className = 'fas fa-volume-down';
     else volumeIcon.className = 'fas fa-volume-up';
 }
