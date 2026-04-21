@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Holy Quran Player - Listen to the Noble Quran</title>
     <link rel="icon" type="image/png" href="Images/Logo-holy-quran.PNG">
-    <meta name="description" content="A professional Quran MP3 Player featuring world-renowned reciters. Listen to the Holy Quran with high-quality audio and an elegant Islamic interface.">
-    
+    <meta name="description"
+        content="A professional Quran MP3 Player featuring world-renowned reciters. Listen to the Holy Quran with high-quality audio and an elegant Islamic interface.">
+
     <!-- Google Fonts: Amiri for Arabic, Inter for English -->
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <!-- 
         SIDE NAVIGATION MENU 
@@ -27,23 +32,23 @@
         </div>
         <ul class="menu-items">
             <li><button class="menu-link" data-page="home-page">
-                <i class="fas fa-home"></i> <span data-i18n="menu_home">Home</span>
-            </button></li>
+                    <i class="fas fa-home"></i> <span data-i18n="menu_home">Home</span>
+                </button></li>
             <li><button class="menu-link" data-page="favorites-page">
-                <i class="fas fa-heart"></i> <span data-i18n="menu_favorites">Favorite Surahs</span>
-            </button></li>
+                    <i class="fas fa-heart"></i> <span data-i18n="menu_favorites">Favorite Surahs</span>
+                </button></li>
             <li><button class="menu-link" data-modal="reciters-modal">
-                <i class="fas fa-user-friends"></i> <span data-i18n="menu_reciters">Reciters</span>
-            </button></li>
+                    <i class="fas fa-user-friends"></i> <span data-i18n="menu_reciters">Reciters</span>
+                </button></li>
             <li><button class="menu-link" data-modal="about-modal">
-                <i class="fas fa-info-circle"></i> <span data-i18n="menu_about">About the App</span>
-            </button></li>
+                    <i class="fas fa-info-circle"></i> <span data-i18n="menu_about">About the App</span>
+                </button></li>
             <li><button class="menu-link" data-modal="settings-modal">
-                <i class="fas fa-cog"></i> <span data-i18n="menu_settings">Settings</span>
-            </button></li>
+                    <i class="fas fa-cog"></i> <span data-i18n="menu_settings">Settings</span>
+                </button></li>
             <li><button class="menu-link" data-modal="contact-modal">
-                <i class="fas fa-envelope"></i> <span data-i18n="menu_contact">Contact</span>
-            </button></li>
+                    <i class="fas fa-envelope"></i> <span data-i18n="menu_contact">Contact</span>
+                </button></li>
         </ul>
         <div class="menu-footer">
             <p>&copy; 2026 <span data-i18n="footer_rights">Holy Quran Player</span></p>
@@ -108,7 +113,8 @@
                 Horizontal grid of top reciter circles for quick selection.
             -->
             <section class="section-container">
-                <h3 class="section-title"><i class="fas fa-star"></i> <span data-i18n="section_reciters">Featured Reciters</span></h3>
+                <h3 class="section-title"><i class="fas fa-star"></i> <span data-i18n="section_reciters">Featured
+                        Reciters</span></h3>
                 <div id="reciters-grid" class="reciters-grid">
                     <!-- Reciter cards will be injected here -->
                 </div>
@@ -120,10 +126,12 @@
             -->
             <section class="section-container">
                 <div class="surah-header">
-                    <h3 class="section-title"><i class="fas fa-book-open"></i> <span data-i18n="section_surahs">Surah Playlist</span></h3>
+                    <h3 class="section-title"><i class="fas fa-book-open"></i> <span data-i18n="section_surahs">Surah
+                            Playlist</span></h3>
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="surah-search" placeholder="Search Surah..." data-i18n-placeholder="search_placeholder">
+                        <input type="text" id="surah-search" placeholder="Search Surah..."
+                            data-i18n-placeholder="search_placeholder">
                     </div>
                 </div>
                 <div id="surah-list" class="surah-list">
@@ -138,7 +146,8 @@
         <!-- FAVORITES PAGE VIEW -->
         <div id="favorites-page" class="app-page" style="display: none;">
             <section id="favorites-section" class="section-container">
-                <h3 class="section-title"><i class="fas fa-heart"></i> <span data-i18n="section_favorites">Favorite Surahs</span></h3>
+                <h3 class="section-title"><i class="fas fa-heart"></i> <span data-i18n="section_favorites">Favorite
+                        Surahs</span></h3>
                 <div id="favorites-list" class="surah-list">
                     <!-- Favorites injected by JS -->
                 </div>
@@ -150,7 +159,7 @@
         MODALS SECTION 
         Pop-up interfaces for Settings, About, Reciter Catalog, and Contact.
     -->
-    
+
     <!-- About Modal -->
     <div id="about-modal" class="modal">
         <div class="modal-content">
@@ -160,12 +169,16 @@
             </div>
             <div class="modal-body">
                 <h4 data-i18n="app_title">Holy Quran Player</h4>
-                <p data-i18n="about_desc">A professional Quran MP3 player that allows listening to high-quality recitations from renowned reciters.</p>
+                <p data-i18n="about_desc">A professional Quran MP3 player that allows listening to high-quality
+                    recitations from renowned reciters.</p>
                 <ul class="feature-list">
                     <li><i class="fas fa-check"></i> <span data-i18n="feat_surahs">114 Surahs available</span></li>
-                    <li><i class="fas fa-check"></i> <span data-i18n="feat_controls">Professional playback controls</span></li>
-                    <li><i class="fas fa-check"></i> <span data-i18n="feat_search">Instant search and filtering</span></li>
-                    <li><i class="fas fa-check"></i> <span data-i18n="feat_settings">Persistent settings & preferences</span></li>
+                    <li><i class="fas fa-check"></i> <span data-i18n="feat_controls">Professional playback
+                            controls</span></li>
+                    <li><i class="fas fa-check"></i> <span data-i18n="feat_search">Instant search and filtering</span>
+                    </li>
+                    <li><i class="fas fa-check"></i> <span data-i18n="feat_settings">Persistent settings &
+                            preferences</span></li>
                 </ul>
                 <p class="spiritual-note" data-i18n="spiritual_note">Listen and reflect on the words of Allah.</p>
             </div>
@@ -187,7 +200,8 @@
                 <div class="social-links">
                     <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="https://github.com/AnasBerkaoui710" target="_blank" class="social-icon"><i class="fab fa-github"></i></a>
+                    <a href="https://github.com/AnasBerkaoui710" target="_blank" class="social-icon"><i
+                            class="fab fa-github"></i></a>
                 </div>
             </div>
         </div>
@@ -277,7 +291,7 @@
                     <button id="skip-forward-btn" title="Forward 10s"><i class="fas fa-redo"></i></button>
                     <button id="next-btn" title="Next Surah"><i class="fas fa-step-forward"></i></button>
                 </div>
-                
+
                 <div class="progress-container">
                     <span id="current-time">0:00:00</span>
                     <div class="progress-bar-wrap" id="progress-wrap">
@@ -289,6 +303,9 @@
 
             <!-- Volume & Quick Actions -->
             <div class="extra-controls">
+                <button id="player-fav-btn" class="player-fav-btn" title="Toggle Favorite">
+                    <i class="far fa-heart"></i>
+                </button>
                 <div class="volume-control">
                     <i id="volume-icon" class="fas fa-volume-up"></i>
                     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
@@ -305,4 +322,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

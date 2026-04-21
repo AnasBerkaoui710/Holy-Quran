@@ -199,6 +199,7 @@ const playingSurahTitle = document.getElementById('playing-surah');
 const playingReciterName = document.getElementById('playing-reciter');
 const playerReciterImg = document.getElementById('player-reciter-img');
 const playerStatus = document.getElementById('player-status');
+const playerFavBtn = document.getElementById('player-fav-btn');
 
 // Side Menu & Modals
 const menuToggle = document.getElementById('menu-toggle');
@@ -253,7 +254,7 @@ async function fetchSurahs() {
         state.surahs = data.data;
         renderSurahList(state.surahs);
         renderFavoritesList();
-        
+
         // Handle session resume
         if (state.settings.rememberSession && state.lastSessionIndex !== undefined && state.lastSessionIndex !== -1) {
             setupInitialSession(state.lastSessionIndex);
@@ -270,11 +271,11 @@ async function fetchSurahs() {
 function applyLanguage(lang) {
     state.settings.language = lang;
     const isAr = lang === 'ar';
-    
+
     // Update HTML attributes
     document.documentElement.lang = lang;
     document.documentElement.dir = isAr ? 'rtl' : 'ltr';
-    
+
     // Update all data-i18n elements
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -336,7 +337,7 @@ menuLinks.forEach(link => {
     link.addEventListener('click', (e) => {
         const modalId = e.currentTarget.getAttribute('data-modal');
         const pageId = e.currentTarget.getAttribute('data-page');
-        
+
         if (modalId) {
             showModal(modalId);
         } else if (pageId) {
@@ -347,6 +348,13 @@ menuLinks.forEach(link => {
 
 logoHomeTrigger.addEventListener('click', () => navigateTo('home-page'));
 
+playerFavBtn.addEventListener('click', () => {
+    if (state.currentSurahIndex !== -1) {
+        const surah = state.surahs[state.currentSurahIndex];
+        toggleFavorite(surah.number);
+    }
+});
+
 function navigateTo(pageId) {
     appPages.forEach(page => {
         page.classList.toggle('active', page.id === pageId);
@@ -354,7 +362,7 @@ function navigateTo(pageId) {
         page.style.display = page.id === pageId ? 'block' : 'none';
     });
     toggleMenu(false);
-    
+
     // Scroll to top when changing page
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -423,7 +431,7 @@ function renderReciterPanel() {
 
 function renderSettingsOptions() {
     const lang = state.settings.language;
-    defaultReciterSelect.innerHTML = RECITERS.map(r => 
+    defaultReciterSelect.innerHTML = RECITERS.map(r =>
         `<option value="${r.id}" ${state.settings.defaultReciterId === r.id ? 'selected' : ''}>${r.name[lang]}</option>`
     ).join('');
 }
@@ -436,15 +444,15 @@ function renderSettingsOptions() {
 function renderSurahList(surahsToRender) {
     if (!surahListContainer) return;
     if (!surahsToRender || surahsToRender.length === 0) return;
-    
+
     surahListContainer.innerHTML = '';
     surahsToRender.forEach((surah) => {
         const actualIndex = state.surahs.findIndex(s => s.number === surah.number);
         const item = document.createElement('div');
         item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''}`;
-        
+
         const isFav = state.favorites.includes(surah.number);
-        
+
         item.innerHTML = `
             <div class="surah-num">${surah.number}</div>
             <div class="surah-info">
@@ -456,15 +464,15 @@ function renderSurahList(surahsToRender) {
                 <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
             </button>
         `;
-        
+
         item.onclick = () => selectSurah(actualIndex);
-        
+
         const favBtn = item.querySelector('.fav-btn');
         favBtn.onclick = (e) => {
             e.stopPropagation();
             toggleFavorite(surah.number);
         };
-        
+
         surahListContainer.appendChild(item);
     });
 }
@@ -472,21 +480,21 @@ function renderSurahList(surahsToRender) {
 function renderFavoritesList() {
     if (!favoritesListContainer) return;
     const lang = state.settings.language;
-    
+
     if (state.favorites.length === 0) {
         favoritesListContainer.innerHTML = `<div class="no-favorites-msg">${TRANSLATIONS[lang].no_favorites}</div>`;
         return;
     }
-    
+
     favoritesListContainer.innerHTML = '';
-    
+
     const favSurahs = state.surahs.filter(s => state.favorites.includes(s.number));
-    
+
     favSurahs.forEach((surah) => {
         const actualIndex = state.surahs.findIndex(s => s.number === surah.number);
         const item = document.createElement('div');
         item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''}`;
-        
+
         item.innerHTML = `
             <div class="surah-num">${surah.number}</div>
             <div class="surah-info">
@@ -498,15 +506,15 @@ function renderFavoritesList() {
                 <i class="fas fa-heart"></i>
             </button>
         `;
-        
+
         item.onclick = () => selectSurah(actualIndex);
-        
+
         const favBtn = item.querySelector('.fav-btn');
         favBtn.onclick = (e) => {
             e.stopPropagation();
             toggleFavorite(surah.number);
         };
-        
+
         favoritesListContainer.appendChild(item);
     });
 }
@@ -518,10 +526,25 @@ function toggleFavorite(number) {
     } else {
         state.favorites.splice(index, 1);
     }
-    
+
     renderSurahList(state.surahs);
     renderFavoritesList();
+    updatePlayerFavIcon();
     saveSettings();
+}
+
+function updatePlayerFavIcon() {
+    if (state.currentSurahIndex === -1) {
+        playerFavBtn.style.visibility = 'hidden';
+        return;
+    }
+    
+    playerFavBtn.style.visibility = 'visible';
+    const surah = state.surahs[state.currentSurahIndex];
+    const isFav = state.favorites.includes(surah.number);
+    
+    playerFavBtn.classList.toggle('active', isFav);
+    playerFavBtn.querySelector('i').className = isFav ? 'fas fa-heart' : 'far fa-heart';
 }
 
 // --- Selection Logic ---
@@ -530,7 +553,7 @@ function selectReciter(reciter) {
     renderReciters();
     renderReciterPanel();
     updateFeaturedUI();
-    
+
     if (state.currentSurahIndex !== -1) {
         playSurah(state.currentSurahIndex);
     }
@@ -556,14 +579,15 @@ function updateFeaturedUI() {
     featuredName.textContent = state.currentReciter.name[lang];
     featuredCountry.textContent = `${TRANSLATIONS[lang].hq_badge} • ${state.currentReciter.country[lang]}`;
     featuredImg.src = state.currentReciter.image;
-    
+
     playerReciterImg.src = state.currentReciter.image;
     playingReciterName.textContent = state.currentReciter.name[lang];
-    
+
     if (state.currentSurahIndex !== -1 && state.surahs.length > 0) {
         const surah = state.surahs[state.currentSurahIndex];
         // Show dual names in player as well
         playingSurahTitle.textContent = `${surah.number}. ${surah.englishName} - ${surah.name}`;
+        updatePlayerFavIcon();
     }
 }
 
@@ -576,7 +600,7 @@ function playSurah(index) {
     if (!surah) return;
     const surahNumber = String(surah.number).padStart(3, '0');
     audio.src = `${state.currentReciter.server}${surahNumber}.mp3`;
-    
+
     audio.play()
         .then(() => {
             state.isPlaying = true;
@@ -657,9 +681,9 @@ audio.onended = () => {
 
 surahSearchInput.oninput = (e) => {
     const q = e.target.value.toLowerCase();
-    renderSurahList(state.surahs.filter(s => 
-        s.englishName.toLowerCase().includes(q) || 
-        s.name.includes(q) || 
+    renderSurahList(state.surahs.filter(s =>
+        s.englishName.toLowerCase().includes(q) ||
+        s.name.includes(q) ||
         s.number.toString().includes(q)
     ));
 };
@@ -672,7 +696,7 @@ defaultReciterSelect.onchange = (e) => { state.settings.defaultReciterId = e.tar
 
 function applyTheme() {
     document.body.classList.toggle('dark-theme', state.settings.isDarkMode);
-    
+
     // Update Icons
     const themeIcon = themeToggleHeader.querySelector('i');
     if (state.settings.isDarkMode) {
@@ -682,7 +706,7 @@ function applyTheme() {
         themeIcon.className = 'fas fa-moon';
         themeToggleHeader.title = state.settings.language === 'en' ? 'Switch to Dark Mode' : 'الوضع الليلي';
     }
-    
+
     saveSettings();
 }
 
