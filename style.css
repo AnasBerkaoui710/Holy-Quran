@@ -74,6 +74,16 @@ body {
     line-height: 1.6;
     padding-bottom: 120px;
     transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden; /* Lock horizontal scrolling globally */
+    width: 100%;
+    position: relative;
+    -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+}
+
+/* Ensure no horizontal scrolling on mobile specifically and add app-like feel */
+html {
+    overflow-x: hidden;
+    height: 100%;
 }
 
 [dir="rtl"] body {
@@ -304,6 +314,66 @@ h3,
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Header Search Styles */
+.header-search-wrap {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 0.2rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.header-search-wrap.expanded {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--accent-color);
+}
+
+.search-toggle {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.1rem;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.header-search-input-container {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease, padding 0.3s ease;
+}
+
+.header-search-wrap.expanded .header-search-input-container {
+    width: 180px;
+    padding: 0 0.5rem;
+}
+
+#header-search-input {
+    background: none;
+    border: none;
+    color: var(--white);
+    width: 100%;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+#header-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 600px) {
+    .header-search-wrap.expanded .header-search-input-container {
+        width: 120px;
     }
 }
 
@@ -1126,5 +1196,68 @@ input:checked+.slider:before {
 
     .surah-list {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Phone Special Refinements */
+@media (max-width: 600px) {
+    .app-header {
+        padding: 0.8rem 0;
+    }
+
+    .logo-area .title-wrap {
+        display: none;
+    }
+
+    .header-left {
+        gap: 0.8rem;
+    }
+
+    .main-logo-img {
+        width: 40px;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .reciters-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.8rem;
+    }
+
+    .reciter-card {
+        padding: 0.8rem 0.5rem;
+    }
+
+    .reciter-card .img-container {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 0.8rem;
+    }
+
+    .reciter-card h4 {
+        font-size: 0.85rem;
+        line-height: 1.2;
+    }
+
+    .reciter-card span {
+        display: none; /* Hide country/subname for minimalism */
+    }
+
+    .header-right {
+        gap: 0.5rem;
+    }
+
+    .lang-toggle-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    /* Prevent any accidental side-scrolling from containers */
+    .container {
+        width: 100%;
+        padding: 0 1rem;
     }
 }

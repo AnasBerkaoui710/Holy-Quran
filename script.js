@@ -174,11 +174,9 @@ const appPages = document.querySelectorAll('.app-page');
 const logoHomeTrigger = document.getElementById('logo-home-trigger');
 const recitersGrid = document.getElementById('reciters-grid');
 const surahSearchInput = document.getElementById('surah-search');
-
-// Featured UI
-const featuredName = document.getElementById('featured-name');
-const featuredCountry = document.getElementById('featured-country');
-const featuredImg = document.getElementById('featured-img');
+const headerSearchWrap = document.getElementById('header-search-wrap');
+const searchToggleHeader = document.getElementById('search-toggle-header');
+const headerSearchInput = document.getElementById('header-search-input');
 
 // Player UI
 const playPauseBtn = document.getElementById('play-pause-btn');
@@ -230,11 +228,10 @@ async function init() {
         loadSettings();
         applyLanguage(state.settings.language);
         await fetchSurahs();
-        renderReciters();
-        renderReciterPanel();
+        updateRecitersUI();
         renderSettingsOptions();
         applySettings();
-        updateFeaturedUI();
+        updatePlayerInfoUI();
     } catch (e) {
         console.error("Initialization failed:", e);
     }
@@ -301,9 +298,8 @@ function applyLanguage(lang) {
         renderSurahList(state.surahs);
         renderFavoritesList();
     }
-    renderReciters();
-    renderReciterPanel();
-    updateFeaturedUI();
+    updateRecitersUI();
+    updatePlayerInfoUI();
     saveSettings();
 }
 
@@ -380,6 +376,64 @@ langToggleHeader.addEventListener('click', () => {
     applyLanguage(newLang);
 });
 
+// Search Logic
+searchToggleHeader.addEventListener('click', () => {
+    headerSearchWrap.classList.toggle('expanded');
+    if (headerSearchWrap.classList.contains('expanded')) {
+        headerSearchInput.focus();
+    }
+});
+
+function normalizeArabic(text) {
+    if (!text) return "";
+    return text
+        .replace(/[\u064B-\u065F]/g, "") // Strip Tashkil
+        .replace(/\u0621/g, "\u0627") // Normalize Hamza
+        .replace(/[\u0622\u0623\u0625]/g, "\u0627") // Normalize Alif
+        .replace(/\u0649/g, "\u064A") // Normalize Yaa
+        .replace(/\u0629/g, "\u0647"); // Normalize Taa Marbuta
+}
+
+function performSearch(query) {
+    const q = query.toLowerCase().trim();
+    const normalizedQ = normalizeArabic(q);
+    
+    // Auto-navigate to home if searching from favorites
+    if (q.length > 0 && document.getElementById('favorites-page').classList.contains('active')) {
+        navigateTo('home-page');
+    }
+    
+    // Sync both inputs
+    headerSearchInput.value = query;
+    surahSearchInput.value = query;
+    
+    // Auto-scroll to playlist on search
+    if (q.length > 0) {
+        const playlistHeader = document.querySelector('.surah-header');
+        if (playlistHeader) {
+            playlistHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+    
+    const filtered = state.surahs.filter(s => {
+        const nameEN = s.englishName.toLowerCase();
+        const meanEN = s.englishNameTranslation.toLowerCase();
+        const nameAR = normalizeArabic(s.name);
+        const num = s.number.toString();
+        
+        return nameEN.includes(q) || 
+               meanEN.includes(q) || 
+               nameAR.includes(normalizedQ) || 
+               s.name.includes(q) || // Exact match (with tashkil)
+               num.includes(q);
+    });
+    
+    renderSurahList(filtered);
+}
+
+headerSearchInput.addEventListener('input', (e) => performSearch(e.target.value));
+surahSearchInput.addEventListener('input', (e) => performSearch(e.target.value));
+
 languageSelect.addEventListener('change', (e) => {
     applyLanguage(e.target.value);
 });
@@ -390,6 +444,11 @@ themeToggleHeader.addEventListener('click', () => {
 });
 
 // --- Rendering Logic ---
+function updateRecitersUI() {
+    renderReciters();
+    renderReciterPanel();
+}
+
 function renderReciters() {
     recitersGrid.innerHTML = '';
     const lang = state.settings.language;
@@ -550,9 +609,8 @@ function updatePlayerFavIcon() {
 // --- Selection Logic ---
 function selectReciter(reciter) {
     state.currentReciter = reciter;
-    renderReciters();
-    renderReciterPanel();
-    updateFeaturedUI();
+    updateRecitersUI();
+    updatePlayerInfoUI();
 
     if (state.currentSurahIndex !== -1) {
         playSurah(state.currentSurahIndex);
@@ -571,14 +629,11 @@ function setupInitialSession(index) {
     audio.src = `${state.currentReciter.server}${surahNumber}.mp3`;
     playerStatus.textContent = TRANSLATIONS[state.settings.language].status_paused;
     updateSurahListHighlight();
-    updateFeaturedUI();
+    updatePlayerInfoUI();
 }
 
-function updateFeaturedUI() {
+function updatePlayerInfoUI() {
     const lang = state.settings.language;
-    featuredName.textContent = state.currentReciter.name[lang];
-    featuredCountry.textContent = `${TRANSLATIONS[lang].hq_badge} • ${state.currentReciter.country[lang]}`;
-    featuredImg.src = state.currentReciter.image;
 
     playerReciterImg.src = state.currentReciter.image;
     playingReciterName.textContent = state.currentReciter.name[lang];
@@ -606,7 +661,6 @@ function playSurah(index) {
             state.isPlaying = true;
             updatePlayerUI();
             updateSurahListHighlight();
-            updateFeaturedUI();
             saveSettings();
         })
         .catch(() => { playerStatus.textContent = TRANSLATIONS[state.settings.language].status_error; });
@@ -677,15 +731,6 @@ function updateVolumeIcon(vol) {
 audio.onended = () => {
     if (state.settings.isAutoplay) nextBtn.click();
     else { state.isPlaying = false; updatePlayerUI(); }
-};
-
-surahSearchInput.oninput = (e) => {
-    const q = e.target.value.toLowerCase();
-    renderSurahList(state.surahs.filter(s =>
-        s.englishName.toLowerCase().includes(q) ||
-        s.name.includes(q) ||
-        s.number.toString().includes(q)
-    ));
 };
 
 // --- Settings Logic ---

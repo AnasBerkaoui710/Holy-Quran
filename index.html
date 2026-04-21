@@ -74,6 +74,16 @@
                 </div>
             </div>
             <div class="header-right">
+                <!-- Header Search -->
+                <div class="header-search-wrap" id="header-search-wrap">
+                    <button id="search-toggle-header" class="icon-btn search-toggle" title="Search Surah">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <div class="header-search-input-container">
+                        <input type="text" id="header-search-input" placeholder="Search..." data-i18n-placeholder="search_placeholder">
+                    </div>
+                </div>
+
                 <!-- Theme Toggle -->
                 <button id="theme-toggle-header" class="theme-toggle-btn" title="Toggle Dark Mode">
                     <i class="fas fa-moon"></i>
@@ -90,24 +100,6 @@
     <main class="container">
         <!-- HOME PAGE VIEW -->
         <div id="home-page" class="app-page active">
-            <!-- 
-                FEATURED RECITER SECTION
-                Highlights the currently active or default reciter. 
-            -->
-            <section id="featured-reciter" class="featured-reciter glass">
-                <div class="featured-info">
-                    <span class="label" data-i18n="featured_label">Featured Reciter</span>
-                    <h2 id="featured-name">Loading...</h2>
-                    <p id="featured-country">Loading...</p>
-                    <div class="featured-badge">
-                        <i class="fas fa-check-circle"></i> <span data-i18n="hq_badge">High Quality MP3</span>
-                    </div>
-                </div>
-                <div class="featured-image">
-                    <img id="featured-img" src="" alt="Featured Reciter">
-                </div>
-            </section>
-
             <!-- 
                 RECITER SELECTION (SHORTCUT GRID)
                 Horizontal grid of top reciter circles for quick selection.
