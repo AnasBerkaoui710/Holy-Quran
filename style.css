@@ -926,6 +926,17 @@ input:checked+.slider:before {
     border-color: var(--primary-color);
 }
 
+.surah-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+.surah-item.disabled:hover {
+    transform: none;
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
 .surah-num {
     width: 36px;
     height: 36px;

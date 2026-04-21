@@ -148,7 +148,8 @@ const RECITERS = [
         description: {
             en: 'A distinguished Moroccan reciter known for his soulful and precise recitation in the Warsh \'an Nafi\' narration.',
             ar: 'مُقْرِئٌ مَغْرِبِيٌّ تَمَيَّزَ بِصَوْتِهِ الخَاشِعِ وَبَرَاعَتِهِ فِي التِّلَاوَةِ بِرِوَايَةِ وَرْشٍ عَنِ نَافِعٍ.'
-        }
+        },
+        surahList: [1,2,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,45,46,47,48,50,51,52,53,54,56,57,67,71,73,76,77,78,79,80,81,82,86,89,90,91,93,95,97,112]
     }
 ];
 
@@ -544,8 +545,9 @@ function renderSurahList(surahsToRender) {
     surahListContainer.innerHTML = '';
     surahsToRender.forEach((surah) => {
         const actualIndex = state.surahs.findIndex(s => s.number === surah.number);
+        const available = isSurahAvailable(surah.number);
         const item = document.createElement('div');
-        item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''}`;
+        item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''} ${!available ? 'disabled' : ''}`;
 
         const isFav = state.favorites.includes(surah.number);
 
@@ -561,7 +563,9 @@ function renderSurahList(surahsToRender) {
             </button>
         `;
 
-        item.onclick = () => selectSurah(actualIndex);
+        if (available) {
+            item.onclick = () => selectSurah(actualIndex);
+        }
 
         const favBtn = item.querySelector('.fav-btn');
         favBtn.onclick = (e) => {
@@ -652,8 +656,15 @@ function selectReciter(reciter) {
     updateRecitersUI();
     updatePlayerInfoUI();
 
+    // Re-render to update disabled states
+    renderSurahList(state.surahs);
+
     if (state.currentSurahIndex !== -1) {
-        playSurah(state.currentSurahIndex);
+        if (!isSurahAvailable(state.surahs[state.currentSurahIndex].number)) {
+             selectSurah(findNextAvailableSurah(state.currentSurahIndex));
+        } else {
+             playSurah(state.currentSurahIndex);
+        }
     }
 }
 
@@ -713,7 +724,7 @@ function playSurah(index) {
 
 function togglePlay() {
     if (state.currentSurahIndex === -1) {
-        selectSurah(0);
+        selectSurah(findNextAvailableSurah(-1));
         return;
     }
     if (state.isPlaying) { 
@@ -753,9 +764,32 @@ function updateSurahListHighlight() {
 }
 
 // --- Controls Events ---
+function isSurahAvailable(surahNumber) {
+    if (!state.currentReciter.surahList) return true;
+    return state.currentReciter.surahList.includes(surahNumber);
+}
+
+function findNextAvailableSurah(currentIndex) {
+    if (state.surahs.length === 0) return 0;
+    let nextIndex = (currentIndex + 1) % state.surahs.length;
+    while(nextIndex !== currentIndex && !isSurahAvailable(state.surahs[nextIndex].number)) {
+        nextIndex = (nextIndex + 1) % state.surahs.length;
+    }
+    return nextIndex;
+}
+
+function findPrevAvailableSurah(currentIndex) {
+    if (state.surahs.length === 0) return 0;
+    let prevIndex = (currentIndex - 1 + state.surahs.length) % state.surahs.length;
+    while(prevIndex !== currentIndex && !isSurahAvailable(state.surahs[prevIndex].number)) {
+        prevIndex = (prevIndex - 1 + state.surahs.length) % state.surahs.length;
+    }
+    return prevIndex;
+}
+
 playPauseBtn.onclick = togglePlay;
-prevBtn.onclick = () => selectSurah((state.currentSurahIndex - 1 + state.surahs.length) % state.surahs.length);
-nextBtn.onclick = () => selectSurah((state.currentSurahIndex + 1) % state.surahs.length);
+prevBtn.onclick = () => selectSurah(findPrevAvailableSurah(state.currentSurahIndex));
+nextBtn.onclick = () => selectSurah(findNextAvailableSurah(state.currentSurahIndex));
 skipBackBtn.onclick = () => audio.currentTime -= 10;
 skipForwardBtn.onclick = () => audio.currentTime += 10;
 
