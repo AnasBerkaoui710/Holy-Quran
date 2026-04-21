@@ -598,12 +598,15 @@ function updatePlayerFavIcon() {
         return;
     }
     
+    if (!playerFavBtn) return;
     playerFavBtn.style.visibility = 'visible';
     const surah = state.surahs[state.currentSurahIndex];
+    if (!surah) return;
     const isFav = state.favorites.includes(surah.number);
     
     playerFavBtn.classList.toggle('active', isFav);
-    playerFavBtn.querySelector('i').className = isFav ? 'fas fa-heart' : 'far fa-heart';
+    const icon = playerFavBtn.querySelector('i');
+    if (icon) icon.className = isFav ? 'fas fa-heart' : 'far fa-heart';
 }
 
 // --- Selection Logic ---
@@ -625,9 +628,10 @@ function selectSurah(index) {
 function setupInitialSession(index) {
     state.currentSurahIndex = index;
     const surah = state.surahs[index];
+    if (!surah) return;
     const surahNumber = String(surah.number).padStart(3, '0');
     audio.src = `${state.currentReciter.server}${surahNumber}.mp3`;
-    playerStatus.textContent = TRANSLATIONS[state.settings.language].status_paused;
+    if (playerStatus) playerStatus.textContent = TRANSLATIONS[state.settings.language].status_paused;
     updateSurahListHighlight();
     updatePlayerInfoUI();
 }
@@ -635,16 +639,20 @@ function setupInitialSession(index) {
 function updatePlayerInfoUI() {
     const lang = state.settings.language;
 
-    playerReciterImg.src = state.currentReciter.image;
-    playingReciterName.textContent = state.currentReciter.name[lang];
+    if (playerReciterImg) playerReciterImg.src = state.currentReciter.image;
+    if (playingReciterName) playingReciterName.textContent = state.currentReciter.name[lang];
 
     if (state.currentSurahIndex !== -1 && state.surahs.length > 0) {
         const surah = state.surahs[state.currentSurahIndex];
+        if (!surah) return;
         // Show dual names in player as well
-        playingSurahTitle.textContent = `${surah.number}. ${surah.englishName} - ${surah.name}`;
+        if (playingSurahTitle) playingSurahTitle.textContent = `${surah.number}. ${surah.englishName} - ${surah.name}`;
         updatePlayerFavIcon();
     }
 }
+
+// Compatibility Alias for legacy/cached calls
+const updateFeaturedUI = updatePlayerInfoUI;
 
 /**
  * AUDIO PLAYBACK ENGINE
@@ -678,10 +686,12 @@ function togglePlay() {
 
 function updatePlayerUI() {
     const lang = state.settings.language;
-    const icon = playPauseBtn.querySelector('i');
-    icon.className = state.isPlaying ? 'fas fa-pause' : 'fas fa-play';
-    playerStatus.textContent = state.isPlaying ? TRANSLATIONS[lang].status_playing : TRANSLATIONS[lang].status_paused;
-    playerStatus.classList.toggle('active', state.isPlaying);
+    const icon = playPauseBtn ? playPauseBtn.querySelector('i') : null;
+    if (icon) icon.className = state.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+    if (playerStatus) {
+        playerStatus.textContent = state.isPlaying ? TRANSLATIONS[lang].status_playing : TRANSLATIONS[lang].status_paused;
+        playerStatus.classList.toggle('active', state.isPlaying);
+    }
 }
 
 function updateSurahListHighlight() {
@@ -743,13 +753,17 @@ function applyTheme() {
     document.body.classList.toggle('dark-theme', state.settings.isDarkMode);
 
     // Update Icons
-    const themeIcon = themeToggleHeader.querySelector('i');
-    if (state.settings.isDarkMode) {
-        themeIcon.className = 'fas fa-sun';
-        themeToggleHeader.title = state.settings.language === 'en' ? 'Switch to Light Mode' : 'الوضع النهاري';
-    } else {
-        themeIcon.className = 'fas fa-moon';
-        themeToggleHeader.title = state.settings.language === 'en' ? 'Switch to Dark Mode' : 'الوضع الليلي';
+    if (themeToggleHeader) {
+        const themeIcon = themeToggleHeader.querySelector('i');
+        if (themeIcon) {
+            if (state.settings.isDarkMode) {
+                themeIcon.className = 'fas fa-sun';
+                themeToggleHeader.title = state.settings.language === 'en' ? 'Switch to Light Mode' : 'الوضع النهاري';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeToggleHeader.title = state.settings.language === 'en' ? 'Switch to Dark Mode' : 'الوضع الليلي';
+            }
+        }
     }
 
     saveSettings();
