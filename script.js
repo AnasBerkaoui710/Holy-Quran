@@ -12,6 +12,8 @@
 const TRANSLATIONS = {
     en: {
         menu_reciters: "Reciters",
+        menu_home: "Home",
+        menu_favorites: "Favorites",
         menu_about: "About the App",
         menu_settings: "Settings",
         menu_contact: "Contact",
@@ -46,10 +48,14 @@ const TRANSLATIONS = {
         status_playing: "Playing",
         status_paused: "Paused",
         status_error: "Error",
-        btn_select: "Select"
+        btn_select: "Select",
+        section_favorites: "Favorite Surahs",
+        no_favorites: "No favorite surahs yet."
     },
     ar: {
         menu_reciters: "القُرَّاءُ",
+        menu_home: "الرَّئِيْسِيَّةُ",
+        menu_favorites: "المُفَضَّلَةُ",
         menu_about: "عَنِ التَّطْبِيقِ",
         menu_settings: "الإِعْدَادَاتُ",
         menu_contact: "اتَّصِلْ بِنَا",
@@ -84,7 +90,9 @@ const TRANSLATIONS = {
         status_playing: "جَارٍ التَّشْغِيلُ",
         status_paused: "مُتَوَقِّفٌ مُؤَقَّتًا",
         status_error: "خَطَأٌ",
-        btn_select: "اِخْتَرْ"
+        btn_select: "اِخْتَرْ",
+        section_favorites: "السُّوَرُ المُفَضَّلَةُ",
+        no_favorites: "لَا تُوجَدُ سُوَرٌ مُفَضَّلَةٌ بَعْدُ."
     }
 };
 
@@ -143,6 +151,7 @@ const RECITERS = [
 // --- State Management ---
 let state = {
     surahs: [],
+    favorites: [],
     currentReciter: RECITERS[0],
     currentSurahIndex: -1,
     isPlaying: false,
@@ -159,6 +168,10 @@ let state = {
 // --- DOM Selectors ---
 const audio = document.getElementById('main-audio');
 const surahListContainer = document.getElementById('surah-list');
+const favoritesSection = document.getElementById('favorites-section');
+const favoritesListContainer = document.getElementById('favorites-list');
+const appPages = document.querySelectorAll('.app-page');
+const logoHomeTrigger = document.getElementById('logo-home-trigger');
 const recitersGrid = document.getElementById('reciters-grid');
 const surahSearchInput = document.getElementById('surah-search');
 
@@ -239,6 +252,7 @@ async function fetchSurahs() {
         const data = await response.json();
         state.surahs = data.data;
         renderSurahList(state.surahs);
+        renderFavoritesList();
         
         // Handle session resume
         if (state.settings.rememberSession && state.lastSessionIndex !== undefined && state.lastSessionIndex !== -1) {
@@ -282,7 +296,10 @@ function applyLanguage(lang) {
     languageSelect.value = lang;
 
     // Refresh dynamic lists
-    if (state.surahs.length > 0) renderSurahList(state.surahs);
+    if (state.surahs.length > 0) {
+        renderSurahList(state.surahs);
+        renderFavoritesList();
+    }
     renderReciters();
     renderReciterPanel();
     updateFeaturedUI();
@@ -317,10 +334,30 @@ overlay.addEventListener('click', hideAllModals);
 
 menuLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-        const target = e.currentTarget.getAttribute('data-modal');
-        showModal(target);
+        const modalId = e.currentTarget.getAttribute('data-modal');
+        const pageId = e.currentTarget.getAttribute('data-page');
+        
+        if (modalId) {
+            showModal(modalId);
+        } else if (pageId) {
+            navigateTo(pageId);
+        }
     });
 });
+
+logoHomeTrigger.addEventListener('click', () => navigateTo('home-page'));
+
+function navigateTo(pageId) {
+    appPages.forEach(page => {
+        page.classList.toggle('active', page.id === pageId);
+        // Explicitly handle display for older browsers or safety
+        page.style.display = page.id === pageId ? 'block' : 'none';
+    });
+    toggleMenu(false);
+    
+    // Scroll to top when changing page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 closeModals.forEach(btn => {
     btn.addEventListener('click', hideAllModals);
@@ -406,8 +443,7 @@ function renderSurahList(surahsToRender) {
         const item = document.createElement('div');
         item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''}`;
         
-        // Use dual names as requested
-        const titleText = `${surah.number}. ${surah.englishName} - ${surah.name}`;
+        const isFav = state.favorites.includes(surah.number);
         
         item.innerHTML = `
             <div class="surah-num">${surah.number}</div>
@@ -416,10 +452,76 @@ function renderSurahList(surahsToRender) {
                 <p>${surah.englishNameTranslation} • ${surah.numberOfAyahs} Ayahs</p>
             </div>
             <div class="surah-arabic">${surah.name}</div>
+            <button class="fav-btn ${isFav ? 'active' : ''}" aria-label="Toggle Favorite">
+                <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
+            </button>
         `;
+        
         item.onclick = () => selectSurah(actualIndex);
+        
+        const favBtn = item.querySelector('.fav-btn');
+        favBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleFavorite(surah.number);
+        };
+        
         surahListContainer.appendChild(item);
     });
+}
+
+function renderFavoritesList() {
+    if (!favoritesListContainer) return;
+    const lang = state.settings.language;
+    
+    if (state.favorites.length === 0) {
+        favoritesListContainer.innerHTML = `<div class="no-favorites-msg">${TRANSLATIONS[lang].no_favorites}</div>`;
+        return;
+    }
+    
+    favoritesListContainer.innerHTML = '';
+    
+    const favSurahs = state.surahs.filter(s => state.favorites.includes(s.number));
+    
+    favSurahs.forEach((surah) => {
+        const actualIndex = state.surahs.findIndex(s => s.number === surah.number);
+        const item = document.createElement('div');
+        item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''}`;
+        
+        item.innerHTML = `
+            <div class="surah-num">${surah.number}</div>
+            <div class="surah-info">
+                <h5>${surah.englishName}</h5>
+                <p>${surah.englishNameTranslation} • ${surah.numberOfAyahs} Ayahs</p>
+            </div>
+            <div class="surah-arabic">${surah.name}</div>
+            <button class="fav-btn active" aria-label="Remove Favorite">
+                <i class="fas fa-heart"></i>
+            </button>
+        `;
+        
+        item.onclick = () => selectSurah(actualIndex);
+        
+        const favBtn = item.querySelector('.fav-btn');
+        favBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleFavorite(surah.number);
+        };
+        
+        favoritesListContainer.appendChild(item);
+    });
+}
+
+function toggleFavorite(number) {
+    const index = state.favorites.indexOf(number);
+    if (index === -1) {
+        state.favorites.push(number);
+    } else {
+        state.favorites.splice(index, 1);
+    }
+    
+    renderSurahList(state.surahs);
+    renderFavoritesList();
+    saveSettings();
 }
 
 // --- Selection Logic ---
@@ -605,7 +707,8 @@ function saveSettings() {
     localStorage.setItem('quran_player_full_v3', JSON.stringify({
         settings: state.settings,
         currentSurahIndex: state.currentSurahIndex,
-        currentReciterId: state.currentReciter.id
+        currentReciterId: state.currentReciter.id,
+        favorites: state.favorites
     }));
 }
 
@@ -614,6 +717,7 @@ function loadSettings() {
     if (saved) {
         const data = JSON.parse(saved);
         state.settings = { ...state.settings, ...data.settings };
+        state.favorites = data.favorites || [];
         if (data.currentReciterId) {
             state.currentReciter = RECITERS.find(r => r.id === data.currentReciterId) || RECITERS[0];
         }

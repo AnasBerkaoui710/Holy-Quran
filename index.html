@@ -26,6 +26,12 @@
             <button id="close-menu" class="icon-btn" aria-label="Close Menu"><i class="fas fa-times"></i></button>
         </div>
         <ul class="menu-items">
+            <li><button class="menu-link" data-page="home-page">
+                <i class="fas fa-home"></i> <span data-i18n="menu_home">Home</span>
+            </button></li>
+            <li><button class="menu-link" data-page="favorites-page">
+                <i class="fas fa-heart"></i> <span data-i18n="menu_favorites">Favorite Surahs</span>
+            </button></li>
             <li><button class="menu-link" data-modal="reciters-modal">
                 <i class="fas fa-user-friends"></i> <span data-i18n="menu_reciters">Reciters</span>
             </button></li>
@@ -54,7 +60,7 @@
                 <button id="menu-toggle" class="menu-toggle" aria-label="Open Menu">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div class="logo-area">
+                <div class="logo-area" id="logo-home-trigger" style="cursor: pointer;">
                     <img src="Images/Logo-holy-quran.PNG" alt="Holy Quran Logo" class="main-logo-img">
                     <div class="title-wrap">
                         <h1 data-i18n="app_title">Holy Quran Player</h1>
@@ -77,54 +83,67 @@
     </header>
 
     <main class="container">
-        <!-- 
-            FEATURED RECITER SECTION
-            Highlights the currently active or default reciter. 
-        -->
-        <section id="featured-reciter" class="featured-reciter glass">
-            <div class="featured-info">
-                <span class="label" data-i18n="featured_label">Featured Reciter</span>
-                <h2 id="featured-name">Loading...</h2>
-                <p id="featured-country">Loading...</p>
-                <div class="featured-badge">
-                    <i class="fas fa-check-circle"></i> <span data-i18n="hq_badge">High Quality MP3</span>
+        <!-- HOME PAGE VIEW -->
+        <div id="home-page" class="app-page active">
+            <!-- 
+                FEATURED RECITER SECTION
+                Highlights the currently active or default reciter. 
+            -->
+            <section id="featured-reciter" class="featured-reciter glass">
+                <div class="featured-info">
+                    <span class="label" data-i18n="featured_label">Featured Reciter</span>
+                    <h2 id="featured-name">Loading...</h2>
+                    <p id="featured-country">Loading...</p>
+                    <div class="featured-badge">
+                        <i class="fas fa-check-circle"></i> <span data-i18n="hq_badge">High Quality MP3</span>
+                    </div>
                 </div>
-            </div>
-            <div class="featured-image">
-                <img id="featured-img" src="" alt="Featured Reciter">
-            </div>
-        </section>
+                <div class="featured-image">
+                    <img id="featured-img" src="" alt="Featured Reciter">
+                </div>
+            </section>
 
-        <!-- 
-            RECITER SELECTION (SHORTCUT GRID)
-            Horizontal grid of top reciter circles for quick selection.
-        -->
-        <section class="section-container">
-            <h3 class="section-title"><i class="fas fa-star"></i> <span data-i18n="section_reciters">Featured Reciters</span></h3>
-            <div id="reciters-grid" class="reciters-grid">
-                <!-- Reciter cards will be injected here -->
-            </div>
-        </section>
+            <!-- 
+                RECITER SELECTION (SHORTCUT GRID)
+                Horizontal grid of top reciter circles for quick selection.
+            -->
+            <section class="section-container">
+                <h3 class="section-title"><i class="fas fa-star"></i> <span data-i18n="section_reciters">Featured Reciters</span></h3>
+                <div id="reciters-grid" class="reciters-grid">
+                    <!-- Reciter cards will be injected here -->
+                </div>
+            </section>
 
-        <!-- 
-            SURAH PLAYLIST SECTION
-            Full list of 114 surahs with search functionality.
-        -->
-        <section class="section-container">
-            <div class="surah-header">
-                <h3 class="section-title"><i class="fas fa-book-open"></i> <span data-i18n="section_surahs">Surah Playlist</span></h3>
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="surah-search" placeholder="Search Surah..." data-i18n-placeholder="search_placeholder">
+            <!-- 
+                SURAH PLAYLIST SECTION
+                Full list of 114 surahs with search functionality.
+            -->
+            <section class="section-container">
+                <div class="surah-header">
+                    <h3 class="section-title"><i class="fas fa-book-open"></i> <span data-i18n="section_surahs">Surah Playlist</span></h3>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="surah-search" placeholder="Search Surah..." data-i18n-placeholder="search_placeholder">
+                    </div>
                 </div>
-            </div>
-            <div id="surah-list" class="surah-list">
-                <div class="loading-spinner">
-                    <i class="fas fa-circle-notch fa-spin"></i>
-                    <p data-i18n="fetching_surahs">Fetching Surahs...</p>
+                <div id="surah-list" class="surah-list">
+                    <div class="loading-spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        <p data-i18n="fetching_surahs">Fetching Surahs...</p>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
+
+        <!-- FAVORITES PAGE VIEW -->
+        <div id="favorites-page" class="app-page" style="display: none;">
+            <section id="favorites-section" class="section-container">
+                <h3 class="section-title"><i class="fas fa-heart"></i> <span data-i18n="section_favorites">Favorite Surahs</span></h3>
+                <div id="favorites-list" class="surah-list">
+                    <!-- Favorites injected by JS -->
+                </div>
+            </section>
+        </div>
     </main>
 
     <!-- 

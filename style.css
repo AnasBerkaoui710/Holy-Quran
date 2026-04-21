@@ -281,6 +281,21 @@ h1, h2, h3, .arabic-text {
     transform: rotate(15deg);
 }
 
+/* Page View Transitions */
+.app-page {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.app-page.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Language Toggle Button */
 .lang-toggle-btn {
     background: rgba(255, 255, 255, 0.15);
@@ -719,6 +734,42 @@ input:checked + .slider:before {
 .surah-info h5 { font-size: 1rem; margin-bottom: 0.1rem; }
 .surah-info p { color: var(--text-muted); font-size: 0.8rem; }
 .surah-arabic { font-size: 1.3rem; color: var(--primary-color); font-weight: 700; margin-inline-start: auto; }
+
+/* Favorite Button Styles */
+.fav-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: var(--transition);
+    margin-inline-start: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fav-btn:hover {
+    color: #e74c3c;
+    transform: scale(1.2);
+}
+
+.fav-btn.active {
+    color: #e74c3c;
+}
+
+.dark-theme .fav-btn.active {
+    color: #ff5252;
+}
+
+.no-favorites-msg {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
 
 /* Player Bar */
 /* 
