@@ -204,6 +204,7 @@ const languageSelect = document.getElementById('language-select');
 const autoplaySwitch = document.getElementById('autoplay-switch');
 const rememberSwitch = document.getElementById('save-position-switch');
 const darkModeSwitch = document.getElementById('dark-mode-switch');
+const themeToggleHeader = document.getElementById('theme-toggle-header');
 const defaultReciterSelect = document.getElementById('default-reciter-select');
 
 /**
@@ -336,6 +337,11 @@ langToggleHeader.addEventListener('click', () => {
 
 languageSelect.addEventListener('change', (e) => {
     applyLanguage(e.target.value);
+});
+
+themeToggleHeader.addEventListener('click', () => {
+    state.settings.isDarkMode = !state.settings.isDarkMode;
+    applySettingsUI();
 });
 
 // --- Rendering Logic ---
@@ -564,6 +570,17 @@ defaultReciterSelect.onchange = (e) => { state.settings.defaultReciterId = e.tar
 
 function applyTheme() {
     document.body.classList.toggle('dark-theme', state.settings.isDarkMode);
+    
+    // Update Icons
+    const themeIcon = themeToggleHeader.querySelector('i');
+    if (state.settings.isDarkMode) {
+        themeIcon.className = 'fas fa-sun';
+        themeToggleHeader.title = state.settings.language === 'en' ? 'Switch to Light Mode' : 'الوضع النهاري';
+    } else {
+        themeIcon.className = 'fas fa-moon';
+        themeToggleHeader.title = state.settings.language === 'en' ? 'Switch to Dark Mode' : 'الوضع الليلي';
+    }
+    
     saveSettings();
 }
 

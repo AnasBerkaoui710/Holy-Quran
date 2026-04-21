@@ -20,14 +20,37 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark Mode Variables */
+/* Dark Mode Variables - High Visibility */
 .dark-theme {
-    --bg-light: #121212;
-    --card-bg: #1e1e1e;
-    --text-main: #e0e0e0;
-    --text-muted: #aaaaaa;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --white: #1e1e1e;
+    --bg-light: #0d0d0d;
+    --card-bg: #1a1a1a;
+    --text-main: #ffffff;
+    --text-muted: #b0b0b0;
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    --white: #1a1a1a;
+}
+
+.dark-theme .glass {
+    background: rgba(26, 26, 26, 0.85);
+    border: 1px solid rgba(212, 175, 55, 0.2); /* Subtle gold border in dark mode */
+}
+
+.dark-theme .surah-item, 
+.dark-theme .reciter-card,
+.dark-theme .reciter-panel-card {
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .surah-item:hover {
+    background: rgba(26, 94, 32, 0.2);
+}
+
+.dark-theme .surah-arabic,
+.dark-theme .section-title,
+.dark-theme .spiritual-note,
+.dark-theme .contact-email,
+.dark-theme .feature-list i {
+    color: var(--accent-color);
 }
 
 /* 
@@ -225,6 +248,34 @@ h1, h2, h3, .arabic-text {
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: rotate(15deg);
 }
 
 /* Language Toggle Button */
