@@ -127,15 +127,15 @@ const RECITERS = [
         }
     },
     {
-        id: 'afs',
-        name: { en: 'Mishary Rashid Alafasy', ar: 'مِشَارِي رَاشِد العَفَاسِي' },
-        subname: 'Alafasy',
-        country: { en: 'Kuwait', ar: 'الكُوَيْتُ' },
-        server: 'https://server12.mp3quran.net/afs/',
-        image: 'Images/mishary-rashid-alafasy.png',
+        id: 'souil',
+        name: { en: 'Younes Souilass', ar: 'يُونُس اسْوِيلَص' },
+        subname: 'Warsh \'an Nafi\'',
+        country: { en: 'Morocco', ar: 'المَغْرِبُ' },
+        server: 'https://server16.mp3quran.net/souilass/Rewayat-Warsh-A-n-Nafi/',
+        image: 'Images/Younes Souilas.jpg',
         description: {
-            en: 'A contemporary world-famous reciter and Imam, known for his beautiful voice and modern, high-quality recordings.',
-            ar: 'قَارِئٌ وَإِمَامٌ كُوَيْتِيٌّ، نَالَ شُهْرَةً عَالَمِيَّةً بِفَضْلِ صَوْتِهِ الخَاشِعِ وَإِصْدَارَاتِهِ الِاحْتِرَافِيَّةِ الحَدِيثَةِ.'
+            en: 'A distinguished Moroccan reciter known for his soulful and precise recitation in the Warsh \'an Nafi\' narration.',
+            ar: 'مُقْرِئٌ مَغْرِبِيٌّ تَمَيَّزَ بِصَوْتِهِ الخَاشِعِ وَبَرَاعَتِهِ فِي التِّلَاوَةِ بِرِوَايَةِ وَرْشٍ عَنِ نَافِعٍ.'
         }
     }
 ];

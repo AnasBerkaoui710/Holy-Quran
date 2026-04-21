@@ -26,7 +26,7 @@ A professional and high-fidelity Quran MP3 Player web application designed with 
    - `Al-Minshawi.jpg`
    - `abdelbassit-abdessamad.jpg`
    - `mahmoud-khalil-al-hussary.jpg`
-   - `mishary-rashid-alafasy.png`
+   - `Younes Souilas.jpg`
    - `Logo-holy-quran.PNG`
 3. **Open `index.html`** in any modern web browser.
 4. For the best experience (saving settings), run via a local server (e.g., VS Code Live Server).
