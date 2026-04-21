@@ -217,6 +217,9 @@ h1, h2, h3, .arabic-text {
     margin-bottom: 2rem;
     box-shadow: var(--shadow);
     background-image: url('https://www.transparenttextures.com/patterns/islamic-art.png');
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .header-container {
