@@ -670,6 +670,7 @@ function selectReciter(reciter) {
 
 function selectSurah(index) {
     state.currentSurahIndex = index;
+    updatePlayerInfoUI();
     playSurah(index);
 }
 
