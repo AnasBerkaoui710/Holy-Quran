@@ -10,6 +10,8 @@ A professional and high-fidelity Quran MP3 Player web application designed with 
 - **📖 Dual Surah Naming**: Displays both English transliterations and original Arabic script for all 114 surahs.
 - **🎨 Enhanced Typography**: Features the classical **Amiri** font for Arabic text and **Inter** for English.
 - **🛠️ Advanced Settings**: Persist your language, reciter, theme, and autoplay preferences.
+- **📱 Perfected Mobile UI**: A fully responsive player bar that beautifully accommodates all device sizes without breaking.
+- **🔎 Advanced Arabic Search**: A normalized search engine that ignores diacritics (Tashkil) to guarantee you always find the right surah.
 
 ## 🌟 Core Features
 
@@ -27,7 +29,6 @@ A professional and high-fidelity Quran MP3 Player web application designed with 
    - `abdelbassit-abdessamad.jpg`
    - `mahmoud-khalil-al-hussary.jpg`
    - `Younes Souilas.jpg`
-   - `Logo-holy-quran.PNG`
 3. **Open `index.html`** in any modern web browser.
 4. For the best experience (saving settings), run via a local server (e.g., VS Code Live Server).
 
