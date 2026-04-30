@@ -150,6 +150,30 @@ const RECITERS = [
             ar: 'مُقْرِئٌ مَغْرِبِيٌّ تَمَيَّزَ بِصَوْتِهِ الخَاشِعِ وَبَرَاعَتِهِ فِي التِّلَاوَةِ بِرِوَايَةِ وَرْشٍ عَنِ نَافِعٍ.'
         },
         surahList: [1,2,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,45,46,47,48,50,51,52,53,54,56,57,67,71,73,76,77,78,79,80,81,82,86,89,90,91,93,95,97,112]
+    },
+    {
+        id: 'koshi',
+        name: { en: 'Aloyoon Al-Koshi', ar: 'العُيُونُ الكُوشِي' },
+        subname: 'Warsh \'an Nafi\'',
+        country: { en: 'Morocco', ar: 'المَغْرِبُ' },
+        server: 'https://server11.mp3quran.net/koshi/',
+        image: 'Images/Laayone-Kouchi.png',
+        description: {
+            en: 'A famous Moroccan reciter known for his unique and humble recitation style in the Warsh \'an Nafi\' narration.',
+            ar: 'مُقْرِئٌ مَغْرِبِيٌّ شَهِيْرٌ بَارِزٌ، عُرِفَ بِتِلَاوَتِهِ الخَاشِعَةِ وَفَرِيدَةِ النَّوْعِ بِرِوَايَةِ وَرْشٍ عَنِ نَافِعٍ.'
+        }
+    },
+    {
+        id: 'jaber',
+        name: { en: 'Ali Jaber', ar: 'عَلِي جَابِر' },
+        subname: 'Murattal',
+        country: { en: 'Saudi Arabia', ar: 'السُّعُودِيَّةُ' },
+        server: 'https://server11.mp3quran.net/a_jbr/',
+        image: 'Images/Ali-Jaber.png',
+        description: {
+            en: 'The legendary Imam of the Grand Mosque in Mecca, his powerful and rhythmic recitations remain iconic across the Muslim world.',
+            ar: 'إِمَامُ الحَرَمِ المَكِّيِّ الشَّرِيفِ الأَسْبَقُ، تَمَيَّزَتْ تِلَاوَاتُهُ بِالقُوَّةِ وَالنَّبْرَةِ المُمَيَّزَةِ الَّتِي لَا تَزَالُ خَالِدَةً.'
+        }
     }
 ];
 
@@ -485,7 +509,7 @@ function updateRecitersUI() {
 function renderReciters() {
     recitersGrid.innerHTML = '';
     const lang = state.settings.language;
-    RECITERS.slice(0, 4).forEach(reciter => {
+    RECITERS.forEach(reciter => {
         const card = document.createElement('div');
         card.className = `reciter-card ${state.currentReciter.id === reciter.id ? 'active' : ''}`;
         card.innerHTML = `
