@@ -52,7 +52,8 @@ const TRANSLATIONS = {
         section_favorites: "Favorite Surahs",
         no_favorites: "No favorite surahs yet.",
         no_results: "No surahs found matching your search.",
-        retry_btn: "Retry Loading"
+        retry_btn: "Retry Loading",
+        btn_download: "Download Surah"
     },
     ar: {
         menu_reciters: "القُرَّاءُ",
@@ -96,7 +97,8 @@ const TRANSLATIONS = {
         section_favorites: "السُّوَرُ المُفَضَّلَةُ",
         no_favorites: "لَا تُوجَدُ سُوَرٌ مُفَضَّلَةٌ بَعْدُ.",
         no_results: "لَمْ يَتِمَّ العُثُورُ عَلَى سُوَرٍ مُطَابِقَةٍ لِبَحْثِكَ.",
-        retry_btn: "إِعَادَةُ المُحَاوَلَةِ"
+        retry_btn: "إِعَادَةُ المُحَاوَلَةِ",
+        btn_download: "تحميل السورة"
     }
 };
 
@@ -227,6 +229,7 @@ const playingReciterName = document.getElementById('playing-reciter');
 const playerReciterImg = document.getElementById('player-reciter-img');
 const playerStatus = document.getElementById('player-status');
 const playerFavBtn = document.getElementById('player-fav-btn');
+const playerDownloadBtn = document.getElementById('player-download-btn');
 
 // Side Menu & Modals
 const menuToggle = document.getElementById('menu-toggle');
@@ -392,6 +395,13 @@ playerFavBtn.addEventListener('click', () => {
     if (state.currentSurahIndex !== -1) {
         const surah = state.surahs[state.currentSurahIndex];
         toggleFavorite(surah.number);
+    }
+});
+
+playerDownloadBtn.addEventListener('click', () => {
+    if (state.currentSurahIndex !== -1) {
+        const surah = state.surahs[state.currentSurahIndex];
+        downloadSurah(surah.number, surah.englishName);
     }
 });
 
@@ -582,13 +592,30 @@ function renderSurahList(surahsToRender) {
                 <p>${surah.englishNameTranslation} • ${surah.numberOfAyahs} Ayahs</p>
             </div>
             <div class="surah-arabic">${surah.name}</div>
-            <button class="fav-btn ${isFav ? 'active' : ''}" aria-label="Toggle Favorite">
-                <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
-            </button>
+            <div class="surah-actions">
+                <button class="download-btn" aria-label="${TRANSLATIONS[lang].btn_download}" title="${TRANSLATIONS[lang].btn_download}">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="fav-btn ${isFav ? 'active' : ''}" aria-label="Toggle Favorite">
+                    <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
+                </button>
+            </div>
         `;
 
         if (available) {
             item.onclick = () => selectSurah(actualIndex);
+        }
+
+        const downloadBtn = item.querySelector('.download-btn');
+        if (!available) {
+            downloadBtn.disabled = true;
+            downloadBtn.style.opacity = '0.3';
+            downloadBtn.style.cursor = 'not-allowed';
+        } else {
+            downloadBtn.onclick = (e) => {
+                e.stopPropagation();
+                downloadSurah(surah.number, surah.englishName);
+            };
         }
 
         const favBtn = item.querySelector('.fav-btn');
@@ -616,8 +643,9 @@ function renderFavoritesList() {
 
     favSurahs.forEach((surah) => {
         const actualIndex = state.surahs.findIndex(s => s.number === surah.number);
+        const available = isSurahAvailable(surah.number);
         const item = document.createElement('div');
-        item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''}`;
+        item.className = `surah-item ${state.currentSurahIndex === actualIndex ? 'playing' : ''} ${!available ? 'disabled' : ''}`;
 
         item.innerHTML = `
             <div class="surah-num">${surah.number}</div>
@@ -626,12 +654,31 @@ function renderFavoritesList() {
                 <p>${surah.englishNameTranslation} • ${surah.numberOfAyahs} Ayahs</p>
             </div>
             <div class="surah-arabic">${surah.name}</div>
-            <button class="fav-btn active" aria-label="Remove Favorite">
-                <i class="fas fa-heart"></i>
-            </button>
+            <div class="surah-actions">
+                <button class="download-btn" aria-label="${TRANSLATIONS[lang].btn_download}" title="${TRANSLATIONS[lang].btn_download}">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="fav-btn active" aria-label="Remove Favorite">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
         `;
 
-        item.onclick = () => selectSurah(actualIndex);
+        if (available) {
+            item.onclick = () => selectSurah(actualIndex);
+        }
+
+        const downloadBtn = item.querySelector('.download-btn');
+        if (!available) {
+            downloadBtn.disabled = true;
+            downloadBtn.style.opacity = '0.3';
+            downloadBtn.style.cursor = 'not-allowed';
+        } else {
+            downloadBtn.onclick = (e) => {
+                e.stopPropagation();
+                downloadSurah(surah.number, surah.englishName);
+            };
+        }
 
         const favBtn = item.querySelector('.fav-btn');
         favBtn.onclick = (e) => {
@@ -672,6 +719,47 @@ function updatePlayerFavIcon() {
     playerFavBtn.classList.toggle('active', isFav);
     const icon = playerFavBtn.querySelector('i');
     if (icon) icon.className = isFav ? 'fas fa-heart' : 'far fa-heart';
+}
+
+function updatePlayerDownloadBtn() {
+    if (state.currentSurahIndex === -1) {
+        playerDownloadBtn.style.visibility = 'hidden';
+        return;
+    }
+    
+    if (!playerDownloadBtn) return;
+    const surah = state.surahs[state.currentSurahIndex];
+    if (!surah) return;
+
+    const available = isSurahAvailable(surah.number);
+    playerDownloadBtn.style.visibility = 'visible';
+    
+    if (!available) {
+        playerDownloadBtn.disabled = true;
+        playerDownloadBtn.style.opacity = '0.3';
+        playerDownloadBtn.style.cursor = 'not-allowed';
+    } else {
+        playerDownloadBtn.disabled = false;
+        playerDownloadBtn.style.opacity = '1';
+        playerDownloadBtn.style.cursor = 'pointer';
+    }
+}
+
+/**
+ * DOWNLOAD LOGIC
+ */
+function downloadSurah(surahNumber, surahName) {
+    const paddedNum = String(surahNumber).padStart(3, '0');
+    const url = `${state.currentReciter.server}${paddedNum}.mp3`;
+    
+    // Create a temporary link element
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${surahNumber}_${surahName}.mp3`);
+    link.setAttribute('target', '_blank');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // --- Selection Logic ---
@@ -721,6 +809,7 @@ function updatePlayerInfoUI() {
         // Show dual names in player as well
         if (playingSurahTitle) playingSurahTitle.textContent = `${surah.number}. ${surah.englishName} - ${surah.name}`;
         updatePlayerFavIcon();
+        updatePlayerDownloadBtn();
     }
 }
 
